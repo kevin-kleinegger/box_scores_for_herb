@@ -6,13 +6,12 @@
     <title>Baseball Box Scores</title>
 </head>
 <body>
-    <h1>Baseball Box Scores</h1>
+    <h1>Box Scores for Herb</h1>
+    <p>Default Date: {{ default_date }}</p>
     <pre>
         {% for score in box_scores %}
             <p>{{ score }}</p>
         {% endfor %}
     </pre>
-    <!-- Your code to format and display box scores -->
-
 </body>
 </html>
