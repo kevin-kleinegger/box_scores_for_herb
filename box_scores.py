@@ -5,6 +5,23 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
+def create_linescore_string(game):
+    linescore = statsapi.get('game_linescore', {'gamePk':game['game_id']})
+    innings = linescore['innings']
+    total = linescore['teams']
+    home_string = ""
+    away_string = ""
+    for inning in innings:
+        try:
+            home_string += " " + str(inning['home']['runs']) + " "
+        except KeyError:
+            home_string += " - "
+        away_string += " " + str(inning['away']['runs']) + " "
+    home_string += "  -  " + str(total['home']['runs']) + ' ' + str(total['home']['hits']) + ' ' + str(total['home']['errors'])
+    away_string += "  -  " + str(total['away']['runs']) + ' ' + str(total['away']['hits']) + ' ' + str(total['away']['errors'])
+    return home_string + '\n' + away_string + '\n'
+
+
 def generate_data(d=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')):
     games = statsapi.schedule(date=d)
     teams = {t['teamName']:t['id'] for t in statsapi.get('teams', {'sportIds':1})['teams']}
@@ -13,7 +30,8 @@ def generate_data(d=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')):
         games = statsapi.schedule(date=d)
     box_scores = []
     for g in games:
-        box_scores.append(statsapi.boxscore(g['game_id']))
+        full_score = create_linescore_string(g) + statsapi.boxscore(g['game_id'])
+        box_scores.append(full_score)
     return box_scores, d
 
 @app.route('/')
