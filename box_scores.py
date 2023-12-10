@@ -1,6 +1,7 @@
 import statsapi
 from datetime import datetime, timedelta
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
+
 
 app = Flask(__name__)
 
@@ -24,6 +25,14 @@ def index():
 def display_box_scores(date):
     box_scores, date = generate_data(date)
     return render_template('index.html', box_scores=box_scores, default_date=date)
+
+@app.route('/submit_date', methods=['POST'])
+def submit_date():
+    # Get the input date from the form
+    input_date = request.form['input_date']
+
+    # Redirect to the route with the specified date
+    return redirect(url_for('display_box_scores', date=input_date))
 
 def get_last_day_of_baseball(teams):
     most_recent_day = 0

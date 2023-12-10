@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baseball Box Scores</title>
+    <title>Box Scores for Herb</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Box Scores for Herb</h1>
-    <p>Default Date: {{ default_date }}</p>
+    <form method="POST" action="/submit_date">
+        <label for="input_date">Date:</label>
+        <input type="text" id="input_date" name="input_date" required>
+        <input type="submit" value="Submit">
+    </form>
+    <p>{{ default_date }}</p>
     <pre>
         {% for score in box_scores %}
             <p>{{ score }}</p>
