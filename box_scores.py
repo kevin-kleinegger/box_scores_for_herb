@@ -30,7 +30,7 @@ def submit_date():
 #By default we want to see yesterday's box scores, 4 hours added to account for GMT timezone
 #Returns an array of box_scores to display, as well as the date used (needs to return the date for the default case where one was not passed in)
 #TODO: dynamically set GMT conversion
-def generate_data(d=(datetime.now() - timedelta(days=150)).strftime('%Y-%m-%d')):
+def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')):
     games = statsapi.schedule(date=d)
     #if there were no games yesterday, find the last day that a game was played and display those
     if len(games)==0:
