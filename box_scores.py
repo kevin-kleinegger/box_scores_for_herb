@@ -21,7 +21,7 @@ def display_box_scores(date):
 def submit_date():
     # Get the input date from the form
     input_date = request.form['input_date']
-
+    #TODO: use flash to validate input, without having to throw a 400
     try:
         parsed_date = datetime.strptime(input_date, "%Y-%m-%d").date()
     except ValueError:
@@ -29,20 +29,6 @@ def submit_date():
 
     if parsed_date >= date.today():
         return "Date must be in the past (not today or future)", 400
-    #TODO: use flash to validate input
-    """
-    #validate inputted date
-    try:
-        parsed_date = datetime.strptime(input_date, "%Y-%m-%d").date()
-    except ValueError:
-        flash("Invalid date format. Please use YYYY-MM-DD")
-        return redirect(url_for('/')) 
-
-    # Check that the date is before today
-    if parsed_date >= date.today():
-        flash("Date must be in the past (not today or future)")
-        return redirect(url_for('/'))
-    """
     # Redirect to the route with the specified date
     return redirect(url_for('display_box_scores', date=input_date))
 
