@@ -11,21 +11,24 @@ def create_linescore_string(game):
     total = linescore['teams']
     home_string = ""
     away_string = ""
-    for inning in innings:
-        #print(inning)
+    header_string = ""
+    for index, inning in enumerate(innings):
         try:
             i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), str(inning['home']['runs']))
         except KeyError:
             i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), "X")
         home_string += i_home_string + ' '
         away_string += i_away_string + ' '
+        header_string += normalize_strings(str(index+1), i_away_string)[0] + ' '
     away_runs, home_runs = normalize_strings(str(total['away']['runs']), str(total['home']['runs']))
     away_hits, home_hits = normalize_strings(str(total['away']['hits']), str(total['home']['hits']))
     away_errors, home_errors = normalize_strings(str(total['away']['errors']), str(total['home']['errors']))
     away_name, home_name = normalize_strings(game['away_name'], game['home_name'])
-    home_string += "  -  " + home_runs + ' ' + home_hits + ' ' + home_errors
-    away_string += "  -  " + away_runs + ' ' + away_hits + ' ' + away_errors
-    return away_name + '\t' + away_string + '\n' + home_name + '\t' +  home_string + '\n'
+
+    home_string += " -  " + home_runs + ' ' + home_hits + ' ' + home_errors
+    away_string += " -  " + away_runs + ' ' + away_hits + ' ' + away_errors
+    header_string = normalize_strings("", away_name)[0] + '\t' + header_string + " -  " + normalize_strings("R", away_runs)[0] + ' ' + normalize_strings("H", away_hits)[0] + ' ' + normalize_strings("E", away_errors)[0]
+    return header_string + '\n' + away_name + '\t' + away_string + '\n' + home_name + '\t' +  home_string + '\n'
 
 def normalize_strings(s1, s2):
     if len(s1) > len(s2):
@@ -86,5 +89,5 @@ def get_last_day_of_baseball(teams):
             output += '-'
     return output
 
-#if __name__ == '__main__':
-#   app.run()
+if __name__ == '__main__':
+    app.run()
