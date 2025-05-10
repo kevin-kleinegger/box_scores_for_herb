@@ -12,20 +12,36 @@ def create_linescore_string(game):
     home_string = ""
     away_string = ""
     for inning in innings:
+        #print(inning)
         try:
-            home_string += " " + str(inning['home']['runs']) + " "
+            i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), str(inning['home']['runs']))
         except KeyError:
-            home_string += " - "
-        away_string += " " + str(inning['away']['runs']) + " "
-    home_string += "  -  " + str(total['home']['runs']) + ' ' + str(total['home']['hits']) + ' ' + str(total['home']['errors'])
-    away_string += "  -  " + str(total['away']['runs']) + ' ' + str(total['away']['hits']) + ' ' + str(total['away']['errors'])
-    return home_string + '\n' + away_string + '\n'
+            i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), "X")
+        home_string += i_home_string + ' '
+        away_string += i_away_string + ' '
+    away_runs, home_runs = normalize_strings(str(total['away']['runs']), str(total['home']['runs']))
+    away_hits, home_hits = normalize_strings(str(total['away']['hits']), str(total['home']['hits']))
+    away_errors, home_errors = normalize_strings(str(total['away']['errors']), str(total['home']['errors']))
+    away_name, home_name = normalize_strings(game['away_name'], game['home_name'])
+    home_string += "  -  " + home_runs + ' ' + home_hits + ' ' + home_errors
+    away_string += "  -  " + away_runs + ' ' + away_hits + ' ' + away_errors
+    return away_name + '\t' + away_string + '\n' + home_name + '\t' +  home_string + '\n'
+
+def normalize_strings(s1, s2):
+    if len(s1) > len(s2):
+        for i in range(len(s1) - len(s2)):
+            s2 = ' ' + s2
+    elif len(s2) > len(s1):
+        for i in range(len(s2) - len(s1)):
+            s1 = ' ' + s1
+    return s1, s2
 
 
-def generate_data(d=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')):
+
+def generate_data(d=(datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')):
     games = statsapi.schedule(date=d)
-    teams = {t['teamName']:t['id'] for t in statsapi.get('teams', {'sportIds':1})['teams']}
     if len(games)==0:
+        teams = {t['teamName']:t['id'] for t in statsapi.get('teams', {'sportIds':1})['teams']}
         d = get_last_day_of_baseball(teams)
         games = statsapi.schedule(date=d)
     box_scores = []
@@ -65,3 +81,6 @@ def get_last_day_of_baseball(teams):
         if(i == 3 or i == 5):
             output += '-'
     return output
+
+#if __name__ == '__main__':
+#    app.run()
