@@ -65,7 +65,3 @@ def get_last_day_of_baseball(teams):
         if(i == 3 or i == 5):
             output += '-'
     return output
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
