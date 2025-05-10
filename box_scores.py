@@ -47,7 +47,11 @@ def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
     box_scores = []
     for g in games:
         full_score = create_linescore_string(g) + statsapi.boxscore(g['game_id'])
-        box_scores.append(full_score)
+        if g['away_name'] == "New York Mets" or g['home_name'] == "New York Mets":
+            box_scores = [full_score] + box_scores
+        else:
+            box_scores.append(full_score)
+    
     return box_scores, d
 
 @app.route('/')
@@ -55,7 +59,7 @@ def index():
     box_scores, dd = generate_data()
     return render_template('index.html', box_scores=box_scores, default_date=dd)
 
-@app.route('/<date>')
+@app.route('/date/<date>')
 def display_box_scores(date):
     box_scores, date = generate_data(date)
     return render_template('index.html', box_scores=box_scores, default_date=date)
@@ -83,4 +87,4 @@ def get_last_day_of_baseball(teams):
     return output
 
 #if __name__ == '__main__':
-#    app.run()
+#   app.run()
