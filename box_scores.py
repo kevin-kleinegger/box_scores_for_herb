@@ -38,7 +38,7 @@ def normalize_strings(s1, s2):
 
 
 
-def generate_data(d=(datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')):
+def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')):
     games = statsapi.schedule(date=d)
     if len(games)==0:
         teams = {t['teamName']:t['id'] for t in statsapi.get('teams', {'sportIds':1})['teams']}
