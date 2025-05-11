@@ -7,7 +7,7 @@ app = Flask(__name__)
 #homepage flask, call generate_datea, pass the results to the HTML and display!
 @app.route('/')
 def index():
-    box_scores, dd = generate_data()
+    box_scores, dd = generate_data((datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
     return render_template('index.html', box_scores=box_scores, default_date=dd)
 
 #display box scores for any other date
@@ -45,7 +45,7 @@ def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
         d = get_last_day_of_baseball(teams)
         games = statsapi.schedule(date=d)
     #for each game, generate a linescore to display with the boxscore
-    box_scores = []
+    box_scores = [statsapi.standings(leagueId="103,104", date=datetime.strptime(d, "%Y-%m-%d").strftime("%m/%d/%Y"))]
     for g in games:
         full_score = create_linescore_string(g) + statsapi.boxscore(g['game_id'])
         #As a Mets fan, of course their game has to always be at the top :)
