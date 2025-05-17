@@ -1,42 +1,6 @@
 import statsapi
-from datetime import datetime, timedelta, date
-from flask import Flask, render_template, request, redirect, url_for
-import os
-import ast
+from datetime import datetime, timedelta
 
-app = Flask(__name__)
-
-#homepage flask, call generate_datea, pass the results to the HTML and display!
-@app.route('/')
-def index():
-    d = (datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
-    if(os.path.exists(d + "_data.txt")):
-        box_scores, dd = read_data_from_file(d)
-    else:
-        box_scores, dd = generate_data(d)
-    return render_template('index.html', box_scores=box_scores, default_date=dd)
-
-#display box scores for any other date
-@app.route('/date/<date>')
-def display_box_scores(date):
-    box_scores, date = generate_data(date)
-    return render_template('index.html', box_scores=box_scores, default_date=date)
-
-#POST method that our HTML calls when a user requests box scores for a specific date
-@app.route('/submit_date', methods=['POST'])
-def submit_date():
-    # Get the input date from the form
-    input_date = request.form['input_date']
-    #TODO: use flash to validate input, without having to throw a 400
-    try:
-        parsed_date = datetime.strptime(input_date, "%Y-%m-%d").date()
-    except ValueError:
-        return "Invalid date format. Use YYYY-MM-DD", 400  # Bad Request
-
-    if parsed_date >= date.today():
-        return "Date must be in the past (not today or future)", 400
-    # Redirect to the route with the specified date
-    return redirect(url_for('display_box_scores', date=input_date))
 
 #main function for getting games for given day and generating all line and box scores
 #takes in date variable d (yyyy-mm-dd), if none given defaults to current date - 28 hours
@@ -60,12 +24,6 @@ def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
         else:
             box_scores.append(full_score)
     return box_scores, d
-
-def read_data_from_file(d):
-    filename = d + "_data.txt"
-    with open(filename, 'r') as file:
-        content = file.read()
-        return ast.literal_eval(content), d
 
 #creates a string displaying team names, runs per inning, and total runs, hits and errors for a given game
 def create_linescore_string(game):
@@ -134,6 +92,3 @@ def get_last_day_of_baseball(teams):
         if(i == 3 or i == 5):
             output += '-'
     return output
-
-if __name__ == '__main__':
-    app.run()
