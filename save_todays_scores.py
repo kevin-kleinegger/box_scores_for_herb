@@ -20,8 +20,10 @@ def write_leaderboards():
 def delete_old_files():
     d1=(datetime.now() - timedelta(hours=52)).strftime('%Y-%m-%d')
     d2=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
-    os.remove(d1 + "_data.txt")
-    os.remove(d2 + "_leaderboards.txt")
+    if os.path.exists(d1 + "_data.txt"):
+        os.remove(d1 + "_data.txt")
+    if os.path.exists(d2 + "_leaderboards.txt"):        
+        os.remove(d2 + "_leaderboards.txt")
     return
 
 def main():
