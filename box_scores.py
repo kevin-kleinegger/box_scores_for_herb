@@ -1,13 +1,19 @@
 import statsapi
 from datetime import datetime, timedelta, date
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
+import os
+import ast
 
 app = Flask(__name__)
 
 #homepage flask, call generate_datea, pass the results to the HTML and display!
 @app.route('/')
 def index():
-    box_scores, dd = generate_data((datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
+    d = (datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
+    if(os.path.exists(d + "_data.txt")):
+        box_scores, dd = read_data_from_file(d)
+    else:
+        box_scores, dd = generate_data(d)
     return render_template('index.html', box_scores=box_scores, default_date=dd)
 
 #display box scores for any other date
@@ -54,6 +60,12 @@ def generate_data(d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d'))
         else:
             box_scores.append(full_score)
     return box_scores, d
+
+def read_data_from_file(d):
+    filename = d + "_data.txt"
+    with open(filename, 'r') as file:
+        content = file.read()
+        return ast.literal_eval(content), d
 
 #creates a string displaying team names, runs per inning, and total runs, hits and errors for a given game
 def create_linescore_string(game):
