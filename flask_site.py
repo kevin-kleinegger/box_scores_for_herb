@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date
 from flask import Flask, render_template, request, redirect, url_for
 import os
 from box_scores import generate_data
+from stats import generate_leaderboards
 import ast
 
 app = Flask(__name__)
@@ -10,8 +11,9 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     d = (datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
-    if(os.path.exists(d + "_data.txt")):
-        box_scores, dd = read_data_from_file(d)
+    filename = d + "_data.txt"
+    if(os.path.exists(filename)):
+        box_scores, dd = read_data_from_file(filename, d)
     else:
         box_scores, dd = generate_data(d)
     return render_template('index.html', box_scores=box_scores, default_date=dd)
@@ -38,8 +40,17 @@ def submit_date():
     # Redirect to the route with the specified date
     return redirect(url_for('display_box_scores', date=input_date))
 
-def read_data_from_file(d):
-    filename = d + "_data.txt"
+@app.route('/stats-for-kevin')
+def display_stats():
+    d = (datetime.now() - timedelta(hours=4)).strftime('%Y-%m-%d')
+    filename = d + "_leaderboards.txt"
+    if(os.path.exists(filename)):
+        lbs, _ = read_data_from_file(filename, d)
+    else:
+        lbs = generate_leaderboards()
+    return render_template('stats-for-kevin.html', leaderboards=lbs, default_date=d)
+
+def read_data_from_file(filename, d):
     with open(filename, 'r') as file:
         content = file.read()
         return ast.literal_eval(content), d
