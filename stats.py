@@ -92,9 +92,15 @@ def make_leaderboard_string(stats, stat_to_make):
 
     stats.sort(key=lambda x:x[stat_to_make], reverse=True)
     top_one_hundred = stats[:100]
+    longest_name_len = max(len(d.get("firstName", "")) for d in top_one_hundred) + max(len(d.get("lastName", "")) for d in top_one_hundred)
+
     display_string = stat_to_make + "\n"
     for i, d in enumerate(top_one_hundred):
-        display_string += str(i+1) + ". " + d['firstName'] + " " + d['lastName'] + "\t" + map_team_name_to_acronym(d["currentTeam"]) + "\t" + str(d[stat_to_make]) + "\n"
+        name_length = len(d.get("firstName", "")) + len(d.get("lastName", ""))
+        spaces_to_add = longest_name_len - name_length
+        display_string += str(i+1) + ". " + d['firstName'] + " " + d['lastName']
+        for i in range(spaces_to_add): display_string += " "
+        display_string += "\t" + map_team_name_to_acronym(d["currentTeam"]) + "\t" + str(d[stat_to_make]) + "\n"
     display_string+="\n\n"
     return display_string 
 

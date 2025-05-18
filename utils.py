@@ -34,3 +34,14 @@ NAME_TO_ACRYONYM = {
 
 def map_team_name_to_acronym(team_name):
     return NAME_TO_ACRYONYM[team_name]
+
+#given two strings, equalize the length of strings by adding whitespace in front of the smaller string
+#returns tuple of strings in same order as passed in
+def normalize_strings(s1, s2):
+    if len(s1) > len(s2):
+        for i in range(len(s1) - len(s2)):
+            s2 = ' ' + s2
+    elif len(s2) > len(s1):
+        for i in range(len(s2) - len(s1)):
+            s1 = ' ' + s1
+    return s1, s2

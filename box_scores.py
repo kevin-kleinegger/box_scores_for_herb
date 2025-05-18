@@ -1,5 +1,6 @@
 import statsapi
 from datetime import datetime, timedelta
+from utils import normalize_strings
 
 
 #main function for getting games for given day and generating all line and box scores
@@ -62,17 +63,6 @@ def create_linescore_string(game):
     header_string = normalize_strings("", away_name)[0] + '\t' + header_string + " -  " + normalize_strings("R", away_runs)[0] + ' ' + normalize_strings("H", away_hits)[0] + ' ' + normalize_strings("E", away_errors)[0]
     #put it all in one big string with newlines and return for display
     return header_string + '\n' + away_name + '\t' + away_string + '\n' + home_name + '\t' +  home_string + '\n'
-
-#given two strings, equalize the length of strings by adding whitespace in front of the smaller string
-#returns tuple of strings in same order as passed in
-def normalize_strings(s1, s2):
-    if len(s1) > len(s2):
-        for i in range(len(s1) - len(s2)):
-            s2 = ' ' + s2
-    elif len(s2) > len(s1):
-        for i in range(len(s2) - len(s1)):
-            s1 = ' ' + s1
-    return s1, s2
 
 #returns the date when baseball was last played, takes in a list of evey team
 #TODO: this is slow and proabably not necessary
