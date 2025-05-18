@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, date
 import os
 
 ABSOLUTE_FILE_PATH = "/home/kevinbackwards/box_scores_for_herb/"
-
+#For local testing
+#ABSOLUTE_FILE_PATH = "/Users/kevinkleinegger/code/box_scores_for_herb/"
 def write_box_scores():
     d=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
     box_scores, _ = generate_data(d)

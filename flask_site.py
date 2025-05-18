@@ -8,6 +8,8 @@ import ast
 app = Flask(__name__)
 
 ABSOLUTE_FILE_PATH = "/home/kevinbackwards/box_scores_for_herb/"
+#For local testing
+#ABSOLUTE_FILE_PATH = "/Users/kevinkleinegger/code/box_scores_for_herb/"
 
 #homepage flask, call generate_datea, pass the results to the HTML and display!
 @app.route('/')

@@ -1,5 +1,6 @@
 import statsapi
 import requests
+from utils import map_team_name_to_acronym
 
 stats_to_check_qualifying = ["tbr", "avg", "obp", "slg", "ops", "babip"]
 
@@ -91,9 +92,10 @@ def make_leaderboard_string(stats, stat_to_make):
 
     stats.sort(key=lambda x:x[stat_to_make], reverse=True)
     top_one_hundred = stats[:100]
-    display_string = ""
-    for d in top_one_hundred:
-        display_string += d['firstName'] + " " + d['lastName'] + " " + d["currentTeam"] + "\t" + str(d[stat_to_make]) + "\n"
+    display_string = stat_to_make + "\n"
+    for i, d in enumerate(top_one_hundred):
+        display_string += str(i) + ". " + d['firstName'] + " " + d['lastName'] + "\t" + map_team_name_to_acronym(d["currentTeam"]) + "\t" + str(d[stat_to_make]) + "\n"
+    display_string+="\n\n"
     return display_string 
 
 
