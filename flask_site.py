@@ -7,11 +7,13 @@ import ast
 
 app = Flask(__name__)
 
+ABSOLUTE_FILE_PATH = "/home/kevinbackwards/box_scores_for_herb/"
+
 #homepage flask, call generate_datea, pass the results to the HTML and display!
 @app.route('/')
 def index():
     d = (datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
-    filename = d + "_data.txt"
+    filename = ABSOLUTE_FILE_PATH + d + "_data.txt"
     if(os.path.exists(filename)):
         box_scores, dd = read_data_from_file(filename, d)
     else:
@@ -44,7 +46,7 @@ def submit_date():
 def display_stats():
     d = (datetime.now() - timedelta(hours=4)).strftime('%Y-%m-%d')
     print("INFO: datetime result: " + d)
-    filename = d + "_leaderboards.txt"
+    filename = ABSOLUTE_FILE_PATH + d + "_leaderboards.txt"
     print("INFO: filename is:" + filename)
     if(os.path.exists(filename)):
         print("calling function")
