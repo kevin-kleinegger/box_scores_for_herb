@@ -43,17 +43,25 @@ def submit_date():
 @app.route('/stats-for-kevin')
 def display_stats():
     d = (datetime.now() - timedelta(hours=4)).strftime('%Y-%m-%d')
+    print("INFO: datetime result: " + d)
     filename = d + "_leaderboards.txt"
+    print("INFO: filename is:" + filename)
     if(os.path.exists(filename)):
+        print("calling function")
         lbs, _ = read_data_from_file(filename, d)
+        print("returned as list!, rendering html")
     else:
+        print("ERROR: leaderboards file not found, running slow load" + str(os.path.exists(filename)))
         lbs = generate_leaderboards()
+        print("WARN: slow load finished")
     return render_template('stats-for-kevin.html', leaderboards=lbs, default_date=d)
 
 def read_data_from_file(filename, d):
     with open(filename, 'r') as file:
+        print("file opened, calling read")
         content = file.read()
+        print("read, returning as list")
         return ast.literal_eval(content), d
-    
+
 if __name__ == '__main__':
     app.run()
