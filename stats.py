@@ -94,7 +94,7 @@ def make_leaderboard_string(stats, stat_to_make):
     top_one_hundred = stats[:100]
     display_string = stat_to_make + "\n"
     for i, d in enumerate(top_one_hundred):
-        display_string += str(i) + ". " + d['firstName'] + " " + d['lastName'] + "\t" + map_team_name_to_acronym(d["currentTeam"]) + "\t" + str(d[stat_to_make]) + "\n"
+        display_string += str(i+1) + ". " + d['firstName'] + " " + d['lastName'] + "\t" + map_team_name_to_acronym(d["currentTeam"]) + "\t" + str(d[stat_to_make]) + "\n"
     display_string+="\n\n"
     return display_string 
 
