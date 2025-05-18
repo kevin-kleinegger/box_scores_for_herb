@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, date
 import os
 
 ABSOLUTE_FILE_PATH = "/home/kevinbackwards/box_scores_for_herb/"
+DAYS_TO_RETAIN=2
 #For local testing
 #ABSOLUTE_FILE_PATH = "/Users/kevinkleinegger/code/box_scores_for_herb/"
 def write_box_scores():
@@ -21,8 +22,8 @@ def write_leaderboards():
         f.write(str(leaderboards))
 
 def delete_old_files():
-    d1=(datetime.now() - timedelta(hours=52)).strftime('%Y-%m-%d')
-    d2=(datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
+    d1=(datetime.now() - timedelta(hours=28+(DAYS_TO_RETAIN*24))).strftime('%Y-%m-%d')
+    d2=(datetime.now() - timedelta(hours=4+(DAYS_TO_RETAIN*24))).strftime('%Y-%m-%d')
     if os.path.exists(ABSOLUTE_FILE_PATH + d1 + "_data.txt"):
         os.remove(ABSOLUTE_FILE_PATH + d1 + "_data.txt")
     if os.path.exists(ABSOLUTE_FILE_PATH + d2 + "_leaderboards.txt"):
