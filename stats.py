@@ -2,7 +2,7 @@ import statsapi
 import requests
 from utils import map_team_name_to_acronym
 
-stats_to_check_qualifying = ["tbr", "avg", "obp", "slg", "ops", "babip"]
+stats_to_check_qualifying = ["tbr", "tbr+", "avg", "obp", "slg", "ops", "babip"]
 
 def calculate_tbr(player_stats):
     try:
@@ -18,23 +18,27 @@ def calculate_tbr(player_stats):
         sf = int(player_stats.get('sacFlies', 0))
         sh = int(player_stats.get('sacBunts', 0))
         gidp = int(player_stats.get('groundIntoDoublePlay', 0))
+        runs = int(player_stats.get('runs', 0))
+        rbis = int(player_stats.get('rbi', 0))
         pa = int(player_stats.get('plateAppearances', 0))
         
         # Calculate singles
         singles = h - doubles - triples - hr
         
         # Calculate numerator and denominator
-        numerator = singles + 2*doubles + 3*triples + 4*hr + bb + hbp + 0.5*sb + 0.5*sf + 0.5*sh - 0.5*gidp - 0.5*cs
-        
+        numerator_tbr = singles + 2*doubles + 3*triples + 4*hr + bb + hbp + 0.75*sb + 0.5*sf + 0.5*sh - 0.5*gidp - 0.75*cs
+        numeratro_tbr_plus = singles + 2*doubles + 3*triples + 4*hr + bb + hbp + 0.75*runs + 0.75*rbis + 0.75*sb + 0.5*sf + 0.5*sh - 0.5*gidp - 0.75*cs
+
         # Avoid division by zero
         if pa == 0:
-            return 0.0
+            return 0.0, 0.0
         
-        tbr = numerator / pa
-        return round(tbr, 3)
+        tbr = numerator_tbr / pa
+        tbr_plus = numeratro_tbr_plus / pa
+        return round(tbr, 3), round(tbr_plus, 3)
     except Exception as e:
         print(f"Error calculating TBR: {e}")
-        return 0.0
+        return 0.0, 0.0
 
 def get_player_ids():
     # Retrieve list of active players
@@ -70,7 +74,8 @@ def get_all_player_stats():
     for p in players:
         data=statsapi.player_stat_data(p, group='hitting', type='season')
         stats = get_player_stats(data)
-        tbr = calculate_tbr(stats)
+        tbr, tbr_plus = calculate_tbr(stats)
+        stats["tbr+"] = tbr_plus
         stats["tbr"] = tbr
         stats["firstName"] = data["first_name"]
         stats["lastName"] = data["last_name"]
@@ -107,7 +112,7 @@ def make_leaderboard_string(stats, stat_to_make):
 
 def generate_leaderboards():
     all_stats = get_all_player_stats()
-    stats_to_display = ["tbr", "avg", "obp", "slg", "ops", "homeRuns", "doubles", "triples", "stolenBases"]
+    stats_to_display = ["tbr", "tbr+", "avg", "obp", "slg", "ops", "homeRuns", "doubles", "triples", "stolenBases", "rbi", "runs"]
     leaderboards = []
     for stat in stats_to_display:
         leaderboards.append(make_leaderboard_string(all_stats, stat))
