@@ -13,11 +13,14 @@
         <input type="text" id="input_date" name="input_date" required>
         <input type="submit" value="Submit">
     </form>
-    <p>{{ default_date }}</p>
-    <pre>
-        {% for lb in leaderboards %}
-            <p>{{ lb }}</p>
+    <div class="leaderboard-grid">
+        {% for i in range(0, leaderboards|length, 4) %}
+            <div class="leaderboard-row">
+                {% for lb in leaderboards[i:i+4] %}
+                    <div class="leaderboard-item"><pre>{{ lb }}</pre></div>
+                {% endfor %}
+            </div>
         {% endfor %}
-    </pre>
+    </div>     
 </body>
 </html>
