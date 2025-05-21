@@ -42,21 +42,15 @@ def create_linescore_string(game):
         #trying to get home runs in bottom of 9th, may throw a Key Error
         #We catch that exception and pass in a X if that is the case
         #inning['away']['runs'] should theoretically always be populated, however could poentially throw a KeyError if it was null
-        try:
-            i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), str(inning['home']['runs']))
-        except KeyError:
-            try:
-                i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), "X")
-            except KeyError:
-                i_away_string, i_home_string = normalize_strings("X", "X")
+        i_away_string, i_home_string = normalize_strings(safely_get_stats(inning, "away", "runs"), safely_get_stats(inning, "home", "runs"))
         home_string += i_home_string + ' '
         away_string += i_away_string + ' '
         #get inning number using index+1, normalize the whitespace in case double digit runs scored
         header_string += normalize_strings(str(index+1), i_away_string)[0] + ' '
     #call normalize_strings on all total values to make sure that home and away all of the same amount of characters for display reasons
-    away_runs, home_runs = normalize_strings(safely_get_runs(total, "away"), safely_get_runs(total, "home"))
-    away_hits, home_hits = normalize_strings(str(total['away']['hits']), str(total['home']['hits']))
-    away_errors, home_errors = normalize_strings(str(total['away']['errors']), str(total['home']['errors']))
+    away_runs, home_runs = normalize_strings(safely_get_stats(total, "away", "runs"), safely_get_stats(total, "home", "runs"))
+    away_hits, home_hits = normalize_strings(safely_get_stats(total, "away", "hits"), safely_get_stats(total, "home", "hits"))
+    away_errors, home_errors = normalize_strings(safely_get_stats(total, "away", "errors"), safely_get_stats(total, "home", "errors"))
     away_name, home_name = normalize_strings(game['away_name'], game['home_name'])
     #add totals to respective strings
     home_string += " -  " + home_runs + ' ' + home_hits + ' ' + home_errors
@@ -86,8 +80,8 @@ def get_last_day_of_baseball(teams):
             output += '-'
     return output
 
-def safely_get_runs(details, h_or_a):
+def safely_get_stats(details, h_or_a, stat):
     try:
-        return str(details[h_or_a]['runs'])
+        return str(details[h_or_a][stat])
     except KeyError:
         return "X"
