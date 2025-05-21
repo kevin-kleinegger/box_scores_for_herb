@@ -54,7 +54,7 @@ def create_linescore_string(game):
         #get inning number using index+1, normalize the whitespace in case double digit runs scored
         header_string += normalize_strings(str(index+1), i_away_string)[0] + ' '
     #call normalize_strings on all total values to make sure that home and away all of the same amount of characters for display reasons
-    away_runs, home_runs = normalize_strings(str(total['away']['runs']), str(total['home']['runs']))
+    away_runs, home_runs = normalize_strings(safely_get_runs(total, "away"), safely_get_runs(total, "home"))
     away_hits, home_hits = normalize_strings(str(total['away']['hits']), str(total['home']['hits']))
     away_errors, home_errors = normalize_strings(str(total['away']['errors']), str(total['home']['errors']))
     away_name, home_name = normalize_strings(game['away_name'], game['home_name'])
@@ -85,3 +85,9 @@ def get_last_day_of_baseball(teams):
         if(i == 3 or i == 5):
             output += '-'
     return output
+
+def safely_get_runs(details, h_or_a):
+    try:
+        return str(details[h_or_a]['runs'])
+    except KeyError:
+        return "X"
