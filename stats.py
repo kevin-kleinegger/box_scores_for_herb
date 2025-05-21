@@ -112,7 +112,7 @@ def make_leaderboard_string(stats, stat_to_make):
 
 def generate_leaderboards():
     all_stats = get_all_player_stats()
-    stats_to_display = ["avg", "homeRuns", "rbi", "obp", "tbr", "tbr+" "slg", "ops", "doubles", "triples", "stolenBases", "runs"]
+    stats_to_display = ["avg", "homeRuns", "rbi", "obp", "tbr", "tbr+", "slg", "ops", "doubles", "triples", "stolenBases", "runs"]
     leaderboards = []
     for stat in stats_to_display:
         leaderboards.append(make_leaderboard_string(all_stats, stat))
