@@ -45,7 +45,10 @@ def create_linescore_string(game):
         try:
             i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), str(inning['home']['runs']))
         except KeyError:
-            i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), "X")
+            try:
+                i_away_string, i_home_string = normalize_strings(str(inning['away']['runs']), "X")
+            except KeyError:
+                i_away_string, i_home_string = normalize_strings("X", "X")
         home_string += i_home_string + ' '
         away_string += i_away_string + ' '
         #get inning number using index+1, normalize the whitespace in case double digit runs scored
