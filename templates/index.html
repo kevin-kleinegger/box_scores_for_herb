@@ -8,11 +8,19 @@
 </head>
 <body>
     <h1>Box Scores for Herb</h1>
-    <form method="POST" action="/submit_date">
-        <label for="input_date">Date:</label>
-        <input type="text" id="input_date" name="input_date" required>
-        <input type="submit" value="Submit">
-    </form>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Left side: Submit Date Form -->
+        <form method="POST" action="/submit_date" style="display: flex; align-items: center; gap: 5px;">
+            <label for="input_date">Date:</label>
+            <input type="text" id="input_date" name="input_date" required>
+            <input type="submit" value="Submit">
+        </form>
+    
+        <!-- Right side: Go to About Button -->
+        <a href="{{ url_for('display_stats') }}">
+            <button type="button">Go to Leaderboards</button>
+        </a>
+    </div>
     <p>{{ default_date }}</p>
     <pre>
         {% for score in box_scores %}
