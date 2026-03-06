@@ -1,0 +1,22 @@
+# Flask web framework
+Flask==3.0.0
+
+# YAML configuration file parsing
+PyYAML==6.0.1
+
+# HTTP requests for MLB StatsAPI
+requests==2.31.0
+
+# MLB Stats API wrapper
+MLB-StatsAPI==1.6.2
+
+# Testing frameworks
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Property-based testing
+hypothesis==6.92.1
+
+# Code quality
+flake8==6.1.0
+black==23.12.1

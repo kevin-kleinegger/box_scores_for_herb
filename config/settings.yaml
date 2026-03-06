@@ -1,0 +1,40 @@
+# Baseball Statistics Application Configuration
+
+# Cache settings
+cache:
+  directory: "./cache"
+  ttl:
+    player_stats: 3600      # 1 hour in seconds
+    box_scores: 86400       # 24 hours in seconds
+    standings: 3600         # 1 hour in seconds
+    leaderboards: 3600      # 1 hour in seconds
+
+# MLB StatsAPI settings
+api:
+  base_url: "https://statsapi.mlb.com/api/v1"
+  timeout: 10               # Request timeout in seconds
+  retry_attempts: 3         # Number of retry attempts for failed requests
+  retry_backoff_base: 2     # Exponential backoff base (wait = base^attempt)
+
+# Logging settings
+logging:
+  level: "INFO"             # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "./logs/app.log"
+  max_bytes: 10485760       # 10MB per log file
+  backup_count: 5           # Keep 5 backup log files
+
+# Theme and visual settings
+theme:
+  name: "newspaper"
+  font_family: "Georgia, serif"
+  base_font_size: "16px"
+  primary_color: "#000000"
+  background_color: "#f5f5f0"
+
+# Team-specific settings
+teams:
+  mets_team_id: 121         # New York Mets team ID for prioritization
+
+# Leaderboard settings
+leaderboards:
+  qualification_threshold: 3.1  # Plate appearances per team game for qualified players
