@@ -39,7 +39,7 @@ def main():
     logger.info("Fetching box scores for last 7 days...")
     box_score_gen = BoxScoreGenerator(api_client)
     
-    for days_ago in range(7):
+    for days_ago in range(1, 8):  # 1-7 days ago to match quick date buttons
         date = (datetime.now() - timedelta(days=days_ago)).strftime("%Y-%m-%d")
         try:
             box_scores, actual_date = box_score_gen.generate_for_date(date)

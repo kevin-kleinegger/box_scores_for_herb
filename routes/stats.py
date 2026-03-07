@@ -42,7 +42,7 @@ def init_stats_routes(leaderboard_gen: LeaderboardGenerator):
             actual_season = season if season else leaderboard_gen._get_current_season()
             
             return render_template(
-                'stats_new.html',
+                'stats.html',
                 leaderboards=leaderboards,
                 current_season=actual_season
             )

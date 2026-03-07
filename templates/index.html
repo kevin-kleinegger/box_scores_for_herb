@@ -8,24 +8,56 @@
 </head>
 <body>
     <h1>Box Scores for Herb</h1>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <!-- Left side: Submit Date Form -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <!-- Date Form -->
         <form method="POST" action="/submit_date" style="display: flex; align-items: center; gap: 5px;">
             <label for="input_date">Date:</label>
             <input type="text" id="input_date" name="input_date" required>
             <input type="submit" value="Submit">
         </form>
+        
+        <!-- Quick Date Navigation -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            {% for date in last_7_dates|reverse %}
+            <a href="/date/{{ date }}">
+                <button type="button" style="padding: 6px 12px; font-size: 0.9em;">{{ date }}</button>
+            </a>
+            {% endfor %}
+        </div>
     
-        <!-- Right side: Go to About Button -->
-        <a href="{{ url_for('display_stats') }}">
+        <!-- Go to Leaderboards Button -->
+        <a href="/stats-for-kevin">
             <button type="button">Go to Leaderboards</button>
         </a>
     </div>
     <p>{{ default_date }}</p>
-    <pre>
-        {% for score in box_scores %}
-            <p>{{ score }}</p>
-        {% endfor %}
-    </pre>
+    
+    <!-- Standings Section -->
+    {% if standings and standings.al_standings and standings.nl_standings %}
+    <div style="display: flex; gap: 40px; justify-content: center;">
+        <!-- American League -->
+        <div style="flex: 0 0 auto;">
+            <pre style="font-family: monospace; font-size: 12px; white-space: pre;">{{ standings.al_standings }}</pre>
+        </div>
+        
+        <!-- National League -->
+        <div style="flex: 0 0 auto;">
+            <pre style="font-family: monospace; font-size: 12px; white-space: pre;">{{ standings.nl_standings }}</pre>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Box Scores Section -->
+    {% for game_data in box_scores %}
+        <div style="margin-bottom: 40px;">
+            <!-- Linescore (inning-by-inning scoring) -->
+            {% if game_data.linescore_text %}
+            <pre style="font-family: monospace; font-size: 12px; white-space: pre; text-align: center;">{{ game_data.linescore_text }}</pre>
+            {% endif %}
+            
+            <!-- Formatted box score text (like old implementation) -->
+            <pre style="font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre; text-align: center;">{{ game_data.box_score_text }}</pre>
+        </div>
+    {% endfor %}
 </body>
 </html>

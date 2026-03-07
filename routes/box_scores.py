@@ -48,7 +48,7 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
             standings_data = standings_gen.generate_for_date(actual_date)
             
             return render_template(
-                'index_new.html',
+                'index.html',
                 box_scores=game_data,
                 standings=standings_data,
                 default_date=actual_date,
@@ -79,7 +79,7 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
             standings_data = standings_gen.generate_for_date(actual_date)
             
             return render_template(
-                'index_new.html',
+                'index.html',
                 box_scores=game_data,
                 standings=standings_data,
                 default_date=actual_date,
