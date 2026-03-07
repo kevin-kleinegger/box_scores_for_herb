@@ -309,6 +309,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - Display box scores with Mets game highlighted
     - Display batting and pitching statistics tables
     - Display standings organized by division
+    - Display "-" for games_back when value is 0.0 (division leaders)
     - Add link to stats page
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.7, 9.1_
   
