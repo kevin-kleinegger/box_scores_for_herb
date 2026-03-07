@@ -292,3 +292,47 @@ class MLBStatsAPIClient:
         logger.info(f"Returning standings for {date}")
         
         return cached_response
+
+    
+    def get_stat_leaders(self, stat_category: str, season: int, stat_group: str, limit: int = 100):
+        """Retrieve stat leaders (already sorted and qualified).
+        
+        This is the optimized approach for leaderboards - the API returns
+        pre-sorted, pre-qualified players with their stats in one call.
+        
+        Args:
+            stat_category: Stat to get leaders for (e.g., "battingAverage", "homeRuns", "era")
+            season: Season year (e.g., 2024)
+            stat_group: "hitting" or "pitching"
+            limit: Number of leaders to return (default 100)
+            
+        Returns:
+            Raw API response with leaders data (normalization deferred to LeaderboardGenerator)
+            
+        Raises:
+            APIClientException: If API request fails
+        """
+        # Check cache first
+        cache_key = f"stat_leaders_{stat_category}_{season}_{stat_group}_{limit}"
+        cached_response = self.cache.get(cache_key, "leaderboards")
+        
+        if cached_response is None:
+            # Cache miss - fetch from API
+            logger.debug(f"Cache miss for {stat_category} leaders, fetching from API")
+            
+            cached_response = self._make_request("/stats/leaders", {
+                "leaderCategories": stat_category,
+                "season": season,
+                "sportId": 1,
+                "statGroup": stat_group,
+                "limit": limit
+            })
+            
+            # Cache the raw API response
+            self.cache.set(cache_key, cached_response, "leaderboards")
+        else:
+            logger.debug(f"Cache hit for {stat_category} leaders")
+        
+        logger.info(f"Returning {stat_category} leaders for {season}")
+        
+        return cached_response
