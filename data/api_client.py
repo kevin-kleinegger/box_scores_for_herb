@@ -201,3 +201,39 @@ class MLBStatsAPIClient:
         logger.info(f"Returning {len(games)} games for {date}")
         
         return games
+
+    
+    def get_box_score(self, game_id: int):
+        """Retrieve detailed box score for a game.
+        
+        Args:
+            game_id: MLB game ID (gamePk)
+            
+        Returns:
+            BoxScore object with complete game details
+            
+        Raises:
+            APIClientException: If API request fails
+        """
+        from models.game import BoxScore, BatterStats, PitcherStats, InningScore
+        
+        # Check cache first
+        cache_key = f"box_score_{game_id}"
+        cached_response = self.cache.get(cache_key, "box_scores")
+        
+        if cached_response is None:
+            # Cache miss - fetch from API
+            logger.debug(f"Cache miss for box score {game_id}, fetching from API")
+            
+            cached_response = self._make_request(f"/game/{game_id}/boxscore")
+            
+            # Cache the raw API response
+            self.cache.set(cache_key, cached_response, "box_scores")
+        else:
+            logger.debug(f"Cache hit for box score {game_id}")
+        
+        # TODO: Normalize response to BoxScore object
+        # For now, return the raw response
+        logger.info(f"Returning box score for game {game_id}")
+        
+        return cached_response
