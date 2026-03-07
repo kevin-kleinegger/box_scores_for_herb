@@ -39,6 +39,9 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
         # Default to yesterday (28 hours ago to account for late games + timezone)
         default_date = (datetime.now() - timedelta(hours=28)).strftime('%Y-%m-%d')
         
+        # Generate last 7 dates for quick navigation
+        last_7_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(1, 8)]
+        
         try:
             # Generate box scores and standings
             game_data, actual_date = box_score_gen.generate_for_date(default_date)
@@ -48,7 +51,8 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
                 'index_new.html',
                 box_scores=game_data,
                 standings=standings_data,
-                default_date=actual_date
+                default_date=actual_date,
+                last_7_dates=last_7_dates
             )
         except Exception as e:
             logger.error(f"Error generating box scores for {default_date}: {e}")
@@ -63,6 +67,9 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
         Args:
             date: Date string in YYYY-MM-DD format
         """
+        # Generate last 7 dates for quick navigation
+        last_7_dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(1, 8)]
+        
         try:
             # Validate date format
             datetime.strptime(date, '%Y-%m-%d')
@@ -75,7 +82,8 @@ def init_box_scores_routes(box_score_gen: BoxScoreGenerator, standings_gen: Stan
                 'index_new.html',
                 box_scores=game_data,
                 standings=standings_data,
-                default_date=actual_date
+                default_date=actual_date,
+                last_7_dates=last_7_dates
             )
         except ValueError:
             logger.warning(f"Invalid date format: {date}")

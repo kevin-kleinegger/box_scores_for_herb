@@ -1,28 +1,135 @@
-h1 {
-    text-align: center;
+/* Newspaper-style Baseball Stats */
+
+body {
+    font-family: 'Courier New', 'Courier', monospace;
+    background-color: #e8dcc0; /* Burnt/aged paper color */
+    color: #2c2c2c;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
 }
 
-p{
+h1 {
     text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    border-bottom: 3px double #2c2c2c;
+    padding-bottom: 10px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-family: 'Courier New', 'Courier', monospace;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #2c2c2c;
+    padding-bottom: 5px;
+    font-weight: bold;
+    font-family: 'Courier New', 'Courier', monospace;
+}
+
+p {
+    text-align: center;
+    font-size: 1.1em;
+}
+
+/* Form and button styling */
+form {
+    margin: 20px 0;
+}
+
+input[type="text"] {
+    padding: 8px;
+    border: 1px solid #2c2c2c;
+    background-color: #f5f5dc;
+    font-family: 'Courier New', 'Courier', monospace;
+    font-size: 1em;
+}
+
+button, input[type="submit"] {
+    padding: 8px 16px;
+    background-color: #2c2c2c;
+    color: #e8dcc0;
+    border: 2px solid #2c2c2c;
+    cursor: pointer;
+    font-family: 'Courier New', 'Courier', monospace;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #4a4a4a;
+    border-color: #4a4a4a;
+}
+
+/* Leaderboard grid layout */
+.stats-section {
+    margin: 40px 0;
 }
 
 .leaderboard-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
     margin-top: 20px;
 }
 
-.leaderboard-row {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+.leaderboard-card {
+    background-color: #f5f5dc;
+    border: 2px solid #2c2c2c;
+    padding: 15px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
-.leaderboard-item {
-    flex: 1;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #f9f9f9;
+.leaderboard-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.3em;
     text-align: center;
+    border-bottom: 1px solid #2c2c2c;
+    padding-bottom: 8px;
+    font-family: 'Courier New', 'Courier', monospace;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    font-family: 'Courier New', 'Courier', monospace;
+}
+
+table th {
+    background-color: #2c2c2c;
+    color: #e8dcc0;
+    padding: 8px;
+    text-align: left;
+    font-weight: bold;
+    border: 1px solid #2c2c2c;
+}
+
+table td {
+    padding: 6px 8px;
+    border: 1px solid #8b7355;
+    background-color: #f5f5dc;
+}
+
+table tr:nth-child(even) td {
+    background-color: #ede4d0;
+}
+
+table tr:hover td {
+    background-color: #d4c4a8;
+}
+
+/* Monospace sections (box scores, standings) */
+pre {
+    font-family: 'Courier New', 'Courier', monospace;
+    background-color: #f5f5dc;
+    border: 1px solid #2c2c2c;
+    padding: 15px;
+    overflow-x: auto;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }

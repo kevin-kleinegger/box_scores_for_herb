@@ -163,13 +163,16 @@ class LeaderboardGenerator:
                 person = leader.get('person', {})
                 team = leader.get('team', {})
                 
+                # Get team abbreviation, fallback to generating from name
+                team_abbr = team.get('abbreviation') or team.get('teamCode') or self._get_team_abbr(team.get('name', 'Unknown'))
+                
                 # Create simplified player data
                 player_data = {
                     'rank': rank,
                     'player_id': person.get('id', 0),
                     'player_name': person.get('fullName', 'Unknown'),
                     'team_name': team.get('name', 'Unknown'),
-                    'team_abbr': team.get('abbreviation', 'UNK'),
+                    'team_abbr': team_abbr,
                     'stat_value': value,
                     'stat_name': display_name
                 }
@@ -226,11 +229,14 @@ class LeaderboardGenerator:
                             # Calculate TBR and TBR+
                             tbr, tbr_plus = self.stats_calculator.calculate_tbr_stats(stats)
                             
+                            # Get team abbreviation
+                            team_abbr = team.get('abbreviation') or team.get('teamCode') or self._get_team_abbr(team.get('name', 'Unknown'))
+                            
                             player_data_tbr = {
                                 'player_id': player_id,
                                 'player_name': person.get('fullName', 'Unknown'),
                                 'team_name': team.get('name', 'Unknown'),
-                                'team_abbr': team.get('abbreviation', 'UNK'),
+                                'team_abbr': team_abbr,
                                 'stat_value': f"{tbr:.3f}",
                                 'stat_name': 'TBR'
                             }
@@ -239,7 +245,7 @@ class LeaderboardGenerator:
                                 'player_id': player_id,
                                 'player_name': person.get('fullName', 'Unknown'),
                                 'team_name': team.get('name', 'Unknown'),
-                                'team_abbr': team.get('abbreviation', 'UNK'),
+                                'team_abbr': team_abbr,
                                 'stat_value': f"{tbr_plus:.3f}",
                                 'stat_name': 'TBR+'
                             }
@@ -264,3 +270,49 @@ class LeaderboardGenerator:
         self.logger.debug(f"Generated TBR+ leaderboard with {len(tbr_plus_leaderboard)} players")
         
         return tbr_leaderboard, tbr_plus_leaderboard
+
+    # Team name to abbreviation mapping
+    TEAM_ABBREVIATIONS = {
+        'Arizona Diamondbacks': 'ARI',
+        'Atlanta Braves': 'ATL',
+        'Baltimore Orioles': 'BAL',
+        'Boston Red Sox': 'BOS',
+        'Chicago Cubs': 'CHC',
+        'Chicago White Sox': 'CWS',
+        'Cincinnati Reds': 'CIN',
+        'Cleveland Guardians': 'CLE',
+        'Colorado Rockies': 'COL',
+        'Detroit Tigers': 'DET',
+        'Houston Astros': 'HOU',
+        'Kansas City Royals': 'KC',
+        'Los Angeles Angels': 'LAA',
+        'Los Angeles Dodgers': 'LAD',
+        'Miami Marlins': 'MIA',
+        'Milwaukee Brewers': 'MIL',
+        'Minnesota Twins': 'MIN',
+        'New York Mets': 'NYM',
+        'New York Yankees': 'NYY',
+        'Oakland Athletics': 'OAK',
+        'Philadelphia Phillies': 'PHI',
+        'Pittsburgh Pirates': 'PIT',
+        'San Diego Padres': 'SD',
+        'San Francisco Giants': 'SF',
+        'Seattle Mariners': 'SEA',
+        'St. Louis Cardinals': 'STL',
+        'Tampa Bay Rays': 'TB',
+        'Texas Rangers': 'TEX',
+        'Toronto Blue Jays': 'TOR',
+        'Washington Nationals': 'WSH'
+    }
+    
+    def _get_team_abbr(self, team_name: str) -> str:
+        """
+        Get team abbreviation from team name.
+        
+        Args:
+            team_name: Full team name
+            
+        Returns:
+            Team abbreviation (e.g., 'NYY' for 'New York Yankees')
+        """
+        return self.TEAM_ABBREVIATIONS.get(team_name, 'UNK')

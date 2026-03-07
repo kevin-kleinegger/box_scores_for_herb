@@ -8,15 +8,24 @@
 </head>
 <body>
     <h1>Box Scores for Herb</h1>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <!-- Left side: Submit Date Form -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <!-- Date Form -->
         <form method="POST" action="/submit_date" style="display: flex; align-items: center; gap: 5px;">
             <label for="input_date">Date:</label>
             <input type="text" id="input_date" name="input_date" required>
             <input type="submit" value="Submit">
         </form>
+        
+        <!-- Quick Date Navigation -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            {% for date in last_7_dates|reverse %}
+            <a href="/date/{{ date }}">
+                <button type="button" style="padding: 6px 12px; font-size: 0.9em;">{{ date }}</button>
+            </a>
+            {% endfor %}
+        </div>
     
-        <!-- Right side: Go to Leaderboards Button -->
+        <!-- Go to Leaderboards Button -->
         <a href="/stats-for-kevin">
             <button type="button">Go to Leaderboards</button>
         </a>

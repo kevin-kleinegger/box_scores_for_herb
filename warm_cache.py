@@ -33,20 +33,26 @@ def main():
     api_client = MLBStatsAPIClient(config, cache)
     stats_calculator = StatsCalculator()
     
-    # Fetch today's box scores
-    from datetime import datetime
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Fetch box scores for last 7 days
+    from datetime import datetime, timedelta
     
-    logger.info("Fetching box scores...")
+    logger.info("Fetching box scores for last 7 days...")
     box_score_gen = BoxScoreGenerator(api_client)
-    box_scores, _ = box_score_gen.generate_for_date(today)
-    logger.info(f"Cached {len(box_scores)} box scores")
+    
+    for days_ago in range(7):
+        date = (datetime.now() - timedelta(days=days_ago)).strftime("%Y-%m-%d")
+        try:
+            box_scores, actual_date = box_score_gen.generate_for_date(date)
+            logger.info(f"Cached {len(box_scores)} box scores for {actual_date}")
+        except Exception as e:
+            logger.warning(f"Failed to cache box scores for {date}: {e}")
     
     # Fetch current standings
+    today = datetime.now().strftime("%Y-%m-%d")
     logger.info("Fetching standings...")
     standings_gen = StandingsGenerator(api_client)
     standings = standings_gen.generate_for_date(today)
-    logger.info(f"Cached standings for {len(standings['divisions'])} divisions")
+    logger.info("Cached standings")
     
     # Fetch current season leaderboards
     logger.info("Fetching leaderboards...")

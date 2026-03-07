@@ -7,28 +7,75 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Stats for Kevin</h1>
+    <h1>Baseball Statistics Leaderboards</h1>
     <p><a href="/"><button type="button">Back to Box Scores</button></a></p>
     
-    {% for stat_name, leaders in leaderboards.items() %}
-        <h2>{{ stat_name }} Leaders</h2>
-        <table border="1" cellpadding="5">
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Team</th>
-                <th>{{ stat_name }}</th>
-            </tr>
-            {% for player_data in leaders[:10] %}
-            <tr>
-                <td>{{ player_data['rank'] }}</td>
-                <td>{{ player_data['player_name'] }}</td>
-                <td>{{ player_data['team_name'] }}</td>
-                <td>{{ player_data['stat_value'] }}</td>
-            </tr>
+    <!-- Pitching Stats Section -->
+    <div class="stats-section">
+        <h2>Pitching Leaders</h2>
+        <div class="leaderboard-grid">
+            {% for stat_name, leaders in leaderboards.items() %}
+                {% if stat_name in ['ERA', 'W', 'K', 'SV', 'IP', 'WHIP'] %}
+                <div class="leaderboard-card">
+                    <h3>{{ stat_name }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>{{ stat_name }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player_data in leaders[:20] %}
+                            <tr>
+                                <td>{{ player_data['rank'] }}</td>
+                                <td>{{ player_data['player_name'] }}</td>
+                                <td>{{ player_data['team_abbr'] }}</td>
+                                <td>{{ player_data['stat_value'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
             {% endfor %}
-        </table>
-        <br>
-    {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Hitting Stats Section -->
+    <div class="stats-section">
+        <h2>Hitting Leaders</h2>
+        <div class="leaderboard-grid">
+            {% for stat_name, leaders in leaderboards.items() %}
+                {% if stat_name not in ['ERA', 'W', 'K', 'SV', 'IP', 'WHIP'] %}
+                <div class="leaderboard-card">
+                    <h3>{{ stat_name }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>{{ stat_name }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player_data in leaders[:20] %}
+                            <tr>
+                                <td>{{ player_data['rank'] }}</td>
+                                <td>{{ player_data['player_name'] }}</td>
+                                <td>{{ player_data['team_abbr'] }}</td>
+                                <td>{{ player_data['stat_value'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
