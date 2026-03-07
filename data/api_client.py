@@ -238,6 +238,135 @@ class MLBStatsAPIClient:
         
         return cached_response
 
+    def get_box_score_text(self, game_id: int) -> str:
+            """Retrieve formatted text box score for a game.
+
+            This returns the pre-formatted ASCII box score string that includes
+            line score, batting stats, pitching stats, and game notes.
+            Uses the statsapi library's boxscore() function.
+
+            Args:
+                game_id: MLB game ID (gamePk)
+
+            Returns:
+                Formatted box score string
+
+            Raises:
+                APIClientException: If API request fails
+            """
+            import statsapi
+
+            # Check cache first
+            cache_key = f"box_score_text_{game_id}"
+            cached_response = self.cache.get(cache_key, "box_scores")
+
+            if cached_response is None:
+                # Cache miss - fetch from API using statsapi library
+                logger.debug(f"Cache miss for text box score {game_id}, fetching from API")
+
+                try:
+                    cached_response = statsapi.boxscore(game_id)
+                except Exception as e:
+                    logger.error(f"Failed to fetch text box score for game {game_id}: {e}")
+                    raise APIClientException(f"Failed to fetch text box score: {e}")
+
+                # Cache the response
+                self.cache.set(cache_key, cached_response, "box_scores")
+            else:
+                logger.debug(f"Cache hit for text box score {game_id}")
+
+            return cached_response
+
+    def get_standings_text(self, date: str) -> str:
+        """Retrieve formatted text standings.
+
+        Uses the statsapi library's standings() function to get
+        nicely formatted standings text.
+
+        Args:
+            date: Date string in YYYY-MM-DD format
+
+        Returns:
+            Formatted standings string
+
+        Raises:
+            APIClientException: If API request fails
+        """
+        import statsapi
+        from datetime import datetime
+
+        # Convert YYYY-MM-DD to MM/DD/YYYY for statsapi
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = date_obj.strftime("%m/%d/%Y")
+
+        # Check cache first
+        cache_key = f"standings_text_{date}"
+        cached_response = self.cache.get(cache_key, "standings")
+
+        if cached_response is None:
+            # Cache miss - fetch from API using statsapi library
+            logger.debug(f"Cache miss for text standings {date}, fetching from API")
+
+            try:
+                # leagueId 103=AL, 104=NL
+                cached_response = statsapi.standings(leagueId="103,104", date=formatted_date)
+            except Exception as e:
+                logger.error(f"Failed to fetch text standings for {date}: {e}")
+                raise APIClientException(f"Failed to fetch text standings: {e}")
+
+            # Cache the response
+            self.cache.set(cache_key, cached_response, "standings")
+        else:
+            logger.debug(f"Cache hit for text standings {date}")
+
+        return cached_response
+
+    def get_standings_text_by_league(self, date: str, league_id: str) -> str:
+        """Retrieve formatted text standings for a specific league.
+
+        Uses the statsapi library's standings() function to get
+        nicely formatted standings text for AL or NL.
+
+        Args:
+            date: Date string in YYYY-MM-DD format
+            league_id: League ID ("103" for AL, "104" for NL)
+
+        Returns:
+            Formatted standings string for the specified league
+
+        Raises:
+            APIClientException: If API request fails
+        """
+        import statsapi
+        from datetime import datetime
+
+        # Convert YYYY-MM-DD to MM/DD/YYYY for statsapi
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = date_obj.strftime("%m/%d/%Y")
+
+        # Check cache first
+        cache_key = f"standings_text_{league_id}_{date}"
+        cached_response = self.cache.get(cache_key, "standings")
+
+        if cached_response is None:
+            # Cache miss - fetch from API using statsapi library
+            logger.debug(f"Cache miss for league {league_id} standings {date}, fetching from API")
+
+            try:
+                cached_response = statsapi.standings(leagueId=league_id, date=formatted_date)
+            except Exception as e:
+                logger.error(f"Failed to fetch standings for league {league_id} on {date}: {e}")
+                raise APIClientException(f"Failed to fetch standings: {e}")
+
+            # Cache the response
+            self.cache.set(cache_key, cached_response, "standings")
+        else:
+            logger.debug(f"Cache hit for league {league_id} standings {date}")
+
+        return cached_response
+
+
+
     
     def get_standings(self, date: str):
         """Retrieve standings as of a specific date.

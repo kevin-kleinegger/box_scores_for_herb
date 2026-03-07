@@ -27,8 +27,8 @@ class StandingsGenerator:
         """
         Generate standings data for a specific date.
         
-        Organizes standings by division and adds highlighting metadata
-        for the specified team.
+        Fetches AL and NL standings separately for side-by-side display.
+        Uses cached API client methods for better performance.
         
         Args:
             date: Date string in YYYY-MM-DD format
@@ -37,37 +37,38 @@ class StandingsGenerator:
         Returns:
             Dictionary containing:
                 - date: The date used
-                - divisions: Dict mapping division name to list of team records
-                - highlighted_team: Name of team to highlight
+                - al_standings: American League standings text
+                - nl_standings: National League standings text
         """
+        from datetime import datetime
+        
         self.logger.info(f"Generating standings for date: {date}")
         
-        # Fetch standings from API (raw response)
-        api_response = self.api_client.get_standings(date)
-        
-        if not api_response or 'records' not in api_response:
-            self.logger.warning(f"No standings data found for {date}")
-            return {
-                'date': date,
-                'divisions': {},
-                'highlighted_team': highlight_team
-            }
-        
-        # Normalize API response and organize by division
-        divisions_with_metadata = self._organize_by_division(api_response, highlight_team)
-        
-        self.logger.info(f"Generated standings for {len(divisions_with_metadata)} divisions")
-        
-        # Convert date back to MM/DD/YYYY format for display
-        from datetime import datetime
+        # Convert date format for display
         date_obj = datetime.strptime(date, "%Y-%m-%d")
         display_date = date_obj.strftime("%m/%d/%Y")
         
-        return {
-            'date': display_date,
-            'divisions': divisions_with_metadata,
-            'highlighted_team': highlight_team
-        }
+        try:
+            # Fetch AL standings (leagueId 103) - uses cached method
+            al_standings = self.api_client.get_standings_text_by_league(date, "103")
+            
+            # Fetch NL standings (leagueId 104) - uses cached method
+            nl_standings = self.api_client.get_standings_text_by_league(date, "104")
+            
+            self.logger.info(f"Generated standings for {date}")
+            
+            return {
+                'date': display_date,
+                'al_standings': al_standings,
+                'nl_standings': nl_standings
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to fetch standings: {e}")
+            return {
+                'date': display_date,
+                'al_standings': '',
+                'nl_standings': ''
+            }
     
     def _organize_by_division(self, api_response: Dict, highlight_team: str) -> Dict[str, List[Dict]]:
         """
