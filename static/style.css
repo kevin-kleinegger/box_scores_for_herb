@@ -124,6 +124,16 @@ table tr:hover td {
     background-color: #d4c4a8;
 }
 
+/* Highlight Mets players */
+table tr.mets-player td {
+    background-color: #e6f3ff;
+    font-weight: bold;
+}
+
+table tr.mets-player:hover td {
+    background-color: #cce5ff;
+}
+
 /* Monospace sections (box scores, standings) */
 pre {
     font-family: 'Courier New', 'Courier', monospace;

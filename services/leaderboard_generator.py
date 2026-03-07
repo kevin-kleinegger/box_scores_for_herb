@@ -281,6 +281,7 @@ class LeaderboardGenerator:
         'Chicago White Sox': 'CWS',
         'Cincinnati Reds': 'CIN',
         'Cleveland Guardians': 'CLE',
+        'Cleveland Indians': 'CLE',  # Historical name
         'Colorado Rockies': 'COL',
         'Detroit Tigers': 'DET',
         'Houston Astros': 'HOU',
@@ -288,8 +289,10 @@ class LeaderboardGenerator:
         'Los Angeles Angels': 'LAA',
         'Los Angeles Dodgers': 'LAD',
         'Miami Marlins': 'MIA',
+        'Florida Marlins': 'MIA',  # Historical name
         'Milwaukee Brewers': 'MIL',
         'Minnesota Twins': 'MIN',
+        'Montreal Expos': 'MON',  # Historical team
         'New York Mets': 'NYM',
         'New York Yankees': 'NYY',
         'Oakland Athletics': 'OAK',
@@ -300,6 +303,7 @@ class LeaderboardGenerator:
         'Seattle Mariners': 'SEA',
         'St. Louis Cardinals': 'STL',
         'Tampa Bay Rays': 'TB',
+        'Tampa Bay Devil Rays': 'TB',  # Historical name
         'Texas Rangers': 'TEX',
         'Toronto Blue Jays': 'TOR',
         'Washington Nationals': 'WSH'

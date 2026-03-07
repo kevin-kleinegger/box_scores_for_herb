@@ -24,19 +24,27 @@ def init_stats_routes(leaderboard_gen: LeaderboardGenerator):
     """
     
     @stats_bp.route('/stats-for-kevin')
-    def display_stats():
+    @stats_bp.route('/stats-for-kevin/<int:season>')
+    def display_stats(season=None):
         """
-        Display stat leaderboards for current season.
+        Display stat leaderboards for specified season.
         
         Shows leaderboards for all standard and custom stats (TBR, TBR+).
+        
+        Args:
+            season: Optional season year (e.g., 2024). Defaults to current season if None.
         """
         try:
-            # Generate all leaderboards for current season
-            leaderboards = leaderboard_gen.generate_all()
+            # Generate all leaderboards for specified season (or current if None)
+            leaderboards = leaderboard_gen.generate_all(season)
+            
+            # Get the actual season used (for display)
+            actual_season = season if season else leaderboard_gen._get_current_season()
             
             return render_template(
                 'stats_new.html',
-                leaderboards=leaderboards
+                leaderboards=leaderboards,
+                current_season=actual_season
             )
         except Exception as e:
             logger.error(f"Error generating leaderboards: {e}")
