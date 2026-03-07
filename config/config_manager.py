@@ -24,12 +24,21 @@ class ConfigurationManager:
         """Load configuration from YAML file.
         
         Args:
-            config_path: Path to the YAML configuration file
+            config_path: Path to the YAML configuration file (relative to project root)
             
         Raises:
             FileNotFoundError: If configuration file doesn't exist
             yaml.YAMLError: If configuration file is invalid YAML
         """
+        # Convert relative path to absolute path based on project root
+        if not os.path.isabs(config_path):
+            # Get the directory containing this file (config/)
+            config_dir = os.path.dirname(os.path.abspath(__file__))
+            # Go up one level to project root
+            project_root = os.path.dirname(config_dir)
+            # Join with the config path
+            config_path = os.path.join(project_root, config_path)
+        
         self.config_path = config_path
         self._config = self._load_config()
     
