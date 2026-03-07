@@ -12,7 +12,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
   - Create requirements.txt with dependencies (Flask, PyYAML, requests, hypothesis, pytest, pytest-cov)
   - _Requirements: 6.1, 6.2_
 
-- [ ] 2. Implement configuration management
+- [x] 2. Implement configuration management
   - [x] 2.1 Create configuration file structure
     - Create config/settings.yaml with cache, API, logging, theme, and leaderboard settings
     - Define configuration schema for all application settings
@@ -35,7 +35,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - **Property 3: Environment Configuration Override**
     - **Validates: Requirements 2.5**
 
-- [ ] 3. Implement structured logging
+- [x] 3. Implement structured logging
   - [x] 3.1 Create Logger utility class
     - Write utils/logger.py with setup() and get_logger() methods
     - Configure log levels, file output, and rotation based on configuration
@@ -46,7 +46,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - Write utils/exceptions.py with BaseballAppException, APIClientException, CacheException, ValidationException, ConfigurationException
     - _Requirements: 5.5_
 
-- [ ] 4. Implement data serialization
+- [x] 4. Implement data serialization
   - [x] 4.1 Create DataSerializer class
     - Write data/serializer.py with serialize(), deserialize(), validate_structure() methods
     - Use json.dumps() and json.loads() exclusively
@@ -69,7 +69,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - **Property 2: Data Structure Validation**
     - **Validates: Requirements 1.3**
 
-- [ ] 5. Implement cache management
+- [x] 5. Implement cache management
   - [x] 5.1 Create CacheManager class
     - Write data/cache_manager.py with get(), set(), invalidate(), clear_expired() methods
     - Implement cache entry structure with metadata (timestamp, cache_type, key)
@@ -98,48 +98,48 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - **Property 7: Cached Data Reuse**
     - **Validates: Requirements 4.4**
 
-- [ ] 6. Checkpoint - Ensure infrastructure tests pass
+- [x] 6. Checkpoint - Ensure infrastructure tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Implement data models
-  - [ ] 7.1 Create game and team data models
+- [x] 7. Implement data models
+  - [x] 7.1 Create game and team data models
     - Write models/game.py with Game, Team, BoxScore, BatterStats, PitcherStats, InningScore dataclasses
     - _Requirements: 11.1_
   
-  - [ ] 7.2 Create player statistics data models
+  - [x] 7.2 Create player statistics data models
     - Write models/player_stats.py with PlayerStats dataclass including offensive stats and custom calculated stats
     - Add is_qualified() method for qualification threshold checking
     - _Requirements: 11.1, 11.2, 11.6_
   
-  - [ ] 7.3 Create standings data models
+  - [x] 7.3 Create standings data models
     - Write models/game.py (append) with Standings and TeamRecord dataclasses
     - _Requirements: 11.1_
   
-  - [ ] 7.4 Create stat definition model
+  - [x] 7.4 Create stat definition model
     - Write models/stat_definition.py with StatDefinition dataclass and format_value() method
     - Define STAT_DEFINITIONS dictionary with batting_average, tbr, tbr_plus configurations
     - _Requirements: 11.5, 12.1_
 
-- [ ] 8. Implement API client with retry logic
-  - [ ] 8.1 Create MLBStatsAPIClient class structure
+- [x] 8. Implement API client with retry logic
+  - [x] 8.1 Create MLBStatsAPIClient class structure
     - Write data/api_client.py with __init__(), _make_request(), _retry_with_backoff() methods
     - Implement exponential backoff retry logic (3 attempts, base 2)
     - Add request logging with parameters and response times
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 5.1, 5.2_
   
-  - [ ] 8.2 Implement game and box score API methods
+  - [x] 8.2 Implement game and box score API methods
     - Add get_games_by_date() and get_box_score() methods
     - Normalize API responses to internal Game and BoxScore models
     - Integrate with CacheManager for caching
     - _Requirements: 8.5, 8.6_
   
-  - [ ] 8.3 Implement standings API methods
+  - [x] 8.3 Implement standings API methods
     - Add get_standings() method
     - Normalize API responses to internal Standings model
     - Integrate with CacheManager for caching
     - _Requirements: 8.5, 8.6, 19.4, 19.5_
   
-  - [ ] 8.4 Implement player statistics API methods
+  - [x] 8.4 Implement player statistics API methods
     - Add get_player_stats(), get_season_stats_batch(), get_qualified_players() methods
     - Implement batch fetching strategy (50 players per batch)
     - Normalize API responses to internal PlayerStats model
@@ -160,8 +160,8 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - **Property 10: API Request Logging**
     - **Validates: Requirements 8.4**
 
-- [ ] 9. Implement statistics calculator
-  - [ ] 9.1 Create StatsCalculator class
+- [x] 9. Implement statistics calculator
+  - [x] 9.1 Create StatsCalculator class
     - Write services/stats_calculator.py with calculate_tbr(), calculate_tbr_plus(), get_league_average_tbr(), calculate_total_bases() methods
     - Implement TBR formula: Total Bases / Runs (handle division by zero)
     - Implement TBR+ formula: (Player TBR / League Average TBR) × 100
@@ -183,7 +183,7 @@ This implementation plan refactors an existing Flask baseball statistics applica
     - **Property 21: TBR+ Calculation Correctness**
     - **Validates: Requirements 20.2**
 
-- [ ] 10. Checkpoint - Ensure data layer tests pass
+- [x] 10. Checkpoint - Ensure data layer tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 11. Implement box score generator
@@ -215,9 +215,9 @@ This implementation plan refactors an existing Flask baseball statistics applica
 - [ ] 13. Implement leaderboard generator with optimization
   - [ ] 13.1 Create LeaderboardGenerator class
     - Write services/leaderboard_generator.py with generate(), _get_qualified_players(), _batch_fetch_stats(), _apply_qualification(), _sort_by_stat() methods
-    - Implement batch fetching strategy: 1 qualified players call + 3-4 batch stats calls
+    - For standard stats (AVG, HR, RBI, OBP, SLG, OPS, ERA, W, K, SV, IP, WHIP): use `/stats/leaders` endpoint (1 API call per stat)
+    - For custom stats (TBR, TBR+): fetch OPS leaders as base (top 100 players), then calculate TBR/TBR+ using StatsCalculator
     - Cache all player stats for 1 hour reuse
-    - Calculate custom stats (TBR, TBR+) from cached data
     - Generate all leaderboards from single cached dataset
     - _Requirements: 4.1, 4.2, 4.3, 12.1, 12.2, 12.3, 12.4_
   

@@ -116,7 +116,7 @@ class MLBStatsAPIClient:
             result = self._retry_with_backoff(make_call)
             elapsed_time = time.time() - start_time
             
-            logger.info("API request successful", extra={
+            logger.debug("API request successful", extra={
                 "endpoint": endpoint,
                 "elapsed_time_ms": int(elapsed_time * 1000)
             })
@@ -198,7 +198,7 @@ class MLBStatsAPIClient:
                 
                 games.append(game)
         
-        logger.info(f"Returning {len(games)} games for {date}")
+        logger.debug(f"Returning {len(games)} games for {date}")
         
         return games
 
@@ -234,7 +234,7 @@ class MLBStatsAPIClient:
         
         # TODO: Normalize response to BoxScore object
         # For now, return the raw response
-        logger.info(f"Returning box score for game {game_id}")
+        logger.debug(f"Returning box score for game {game_id}")
         
         return cached_response
 
@@ -289,7 +289,7 @@ class MLBStatsAPIClient:
         else:
             logger.debug(f"Cache hit for standings on {date}")
         
-        logger.info(f"Returning standings for {date}")
+        logger.debug(f"Returning standings for {date}")
         
         return cached_response
 
@@ -333,6 +333,6 @@ class MLBStatsAPIClient:
         else:
             logger.debug(f"Cache hit for {stat_category} leaders")
         
-        logger.info(f"Returning {stat_category} leaders for {season}")
+        logger.debug(f"Returning {stat_category} leaders for {season}")
         
         return cached_response
