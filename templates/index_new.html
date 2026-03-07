@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Scores for Herb</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Box Scores for Herb</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Left side: Submit Date Form -->
+        <form method="POST" action="/submit_date" style="display: flex; align-items: center; gap: 5px;">
+            <label for="input_date">Date:</label>
+            <input type="text" id="input_date" name="input_date" required>
+            <input type="submit" value="Submit">
+        </form>
+    
+        <!-- Right side: Go to Leaderboards Button -->
+        <a href="/stats-for-kevin">
+            <button type="button">Go to Leaderboards</button>
+        </a>
+    </div>
+    <p>{{ default_date }}</p>
+    
+    <!-- Standings Section -->
+    {% if standings %}
+    <h2>Standings - {{ standings.date }}</h2>
+    {% for division_name, teams in standings.divisions.items() %}
+        <h3>{{ division_name }}</h3>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Team</th>
+                <th>W</th>
+                <th>L</th>
+                <th>PCT</th>
+                <th>GB</th>
+            </tr>
+            {% for team_data in teams %}
+            <tr {% if team_data.is_highlighted %}style="background-color: #ffeb3b;"{% endif %}>
+                <td>{{ team_data.team.team_name }}</td>
+                <td>{{ team_data.team.wins }}</td>
+                <td>{{ team_data.team.losses }}</td>
+                <td>{{ "%.3f"|format(team_data.team.winning_percentage) }}</td>
+                <td>{% if team_data.team.games_back == 0.0 %}-{% else %}{{ team_data.team.games_back }}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+    {% endif %}
+    
+    <!-- Box Scores Section -->
+    <h2>Box Scores</h2>
+    {% for game_data in box_scores %}
+        <div style="margin-bottom: 30px; {% if game_data.is_mets_game %}background-color: #e3f2fd; padding: 10px;{% endif %}">
+            <h3>{{ game_data.game.away_team.name }} @ {{ game_data.game.home_team.name }}</h3>
+            <p><strong>Final Score:</strong> {{ game_data.game.away_team.name }} {{ game_data.game.away_score }} - {{ game_data.game.home_team.name }} {{ game_data.game.home_score }}</p>
+            
+            <!-- Raw box score data (temporary - will format properly later) -->
+            <pre style="font-size: 12px; overflow-x: auto;">{{ game_data.box_score }}</pre>
+        </div>
+    {% endfor %}
+</body>
+</html>

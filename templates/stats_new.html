@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats for Kevin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Stats for Kevin</h1>
+    <p><a href="/"><button type="button">Back to Box Scores</button></a></p>
+    
+    {% for stat_name, leaders in leaderboards.items() %}
+        <h2>{{ stat_name }} Leaders</h2>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Team</th>
+                <th>{{ stat_name }}</th>
+            </tr>
+            {% for player_data in leaders[:10] %}
+            <tr>
+                <td>{{ player_data['rank'] }}</td>
+                <td>{{ player_data['player_name'] }}</td>
+                <td>{{ player_data['team_name'] }}</td>
+                <td>{{ player_data['stat_value'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+</body>
+</html>
