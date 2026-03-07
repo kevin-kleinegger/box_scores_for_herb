@@ -25,29 +25,29 @@
     
     <!-- Standings Section -->
     {% if standings and standings.al_standings and standings.nl_standings %}
-    <h2>Standings - {{ standings.date }}</h2>
-    <div style="display: flex; gap: 40px;">
+    <div style="display: flex; gap: 40px; justify-content: center;">
         <!-- American League -->
-        <div style="flex: 1;">
+        <div style="flex: 0 0 auto;">
             <pre style="font-family: monospace; font-size: 12px; white-space: pre;">{{ standings.al_standings }}</pre>
         </div>
         
         <!-- National League -->
-        <div style="flex: 1;">
+        <div style="flex: 0 0 auto;">
             <pre style="font-family: monospace; font-size: 12px; white-space: pre;">{{ standings.nl_standings }}</pre>
         </div>
     </div>
     {% endif %}
     
     <!-- Box Scores Section -->
-    <h2>Box Scores</h2>
     {% for game_data in box_scores %}
         <div style="margin-bottom: 40px;">
-            <h3>{{ game_data.game.away_team.name }} @ {{ game_data.game.home_team.name }}</h3>
-            <p><strong>Final Score:</strong> {{ game_data.game.away_team.name }} {{ game_data.game.away_score }} - {{ game_data.game.home_team.name }} {{ game_data.game.home_score }}</p>
+            <!-- Linescore (inning-by-inning scoring) -->
+            {% if game_data.linescore_text %}
+            <pre style="font-family: monospace; font-size: 12px; white-space: pre; text-align: center;">{{ game_data.linescore_text }}</pre>
+            {% endif %}
             
             <!-- Formatted box score text (like old implementation) -->
-            <pre style="font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre;">{{ game_data.box_score_text }}</pre>
+            <pre style="font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre; text-align: center;">{{ game_data.box_score_text }}</pre>
         </div>
     {% endfor %}
 </body>

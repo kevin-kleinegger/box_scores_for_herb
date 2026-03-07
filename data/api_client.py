@@ -277,6 +277,43 @@ class MLBStatsAPIClient:
 
             return cached_response
 
+    def get_linescore(self, game_id: int) -> Dict[str, Any]:
+        """Retrieve linescore data for a game.
+
+        This returns the inning-by-inning scoring data.
+
+        Args:
+            game_id: MLB game ID (gamePk)
+
+        Returns:
+            Dictionary with linescore data including innings and totals
+
+        Raises:
+            APIClientException: If API request fails
+        """
+        import statsapi
+
+        # Check cache first
+        cache_key = f"linescore_{game_id}"
+        cached_response = self.cache.get(cache_key, "box_scores")
+
+        if cached_response is None:
+            # Cache miss - fetch from API
+            logger.debug(f"Cache miss for linescore {game_id}, fetching from API")
+
+            try:
+                cached_response = statsapi.get('game_linescore', {'gamePk': game_id})
+            except Exception as e:
+                logger.error(f"Failed to fetch linescore for game {game_id}: {e}")
+                raise APIClientException(f"Failed to fetch linescore: {e}")
+
+            # Cache the response
+            self.cache.set(cache_key, cached_response, "box_scores")
+        else:
+            logger.debug(f"Cache hit for linescore {game_id}")
+
+        return cached_response
+
     def get_standings_text(self, date: str) -> str:
         """Retrieve formatted text standings.
 
