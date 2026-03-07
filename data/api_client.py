@@ -237,3 +237,58 @@ class MLBStatsAPIClient:
         logger.info(f"Returning box score for game {game_id}")
         
         return cached_response
+
+    
+    def get_standings(self, date: str):
+        """Retrieve standings as of a specific date.
+        
+        Args:
+            date: Date string in YYYY-MM-DD format
+            
+        Returns:
+            Raw API response with standings data (normalization deferred to StandingsGenerator)
+            
+        Raises:
+            APIClientException: If API request fails
+        """
+        from datetime import datetime
+        
+        # Check cache first
+        cache_key = f"standings_{date}"
+        cached_response = self.cache.get(cache_key, "standings")
+        
+        if cached_response is None:
+            # Cache miss - fetch from API
+            logger.debug(f"Cache miss for standings on {date}, fetching from API")
+            
+            # Convert YYYY-MM-DD to MM/DD/YYYY for API
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            api_date = date_obj.strftime("%m/%d/%Y")
+            year = date_obj.year
+            
+            cached_response = self._make_request("/standings", {
+                "leagueId": "103,104",  # AL and NL
+                "season": year,
+                "date": api_date,
+                "standingsTypes": "regularSeason",
+                "hydrate": "team"  # Get full team names
+            })
+            
+            # If no records returned (postseason date), get final regular season standings
+            if 'records' not in cached_response or len(cached_response['records']) == 0:
+                logger.debug(f"No standings for {date} (likely postseason), fetching final regular season standings")
+                cached_response = self._make_request("/standings", {
+                    "leagueId": "103,104",
+                    "season": year,
+                    "standingsTypes": "regularSeason",
+                    "hydrate": "team"
+                })
+            
+            # Cache the raw API response
+            self.cache.set(cache_key, cached_response, "standings")
+        else:
+            logger.debug(f"Cache hit for standings on {date}")
+        
+        logger.info(f"Returning standings for {date}")
+        
+        return cached_response
