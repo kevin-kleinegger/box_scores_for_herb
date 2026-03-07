@@ -336,3 +336,41 @@ class MLBStatsAPIClient:
         logger.debug(f"Returning {stat_category} leaders for {season}")
         
         return cached_response
+
+    
+    def get_player_season_stats(self, player_id: int, season: int, stat_group: str = 'hitting'):
+        """Retrieve season stats for a specific player.
+        
+        Args:
+            player_id: MLB player ID
+            season: Season year (e.g., 2024)
+            stat_group: 'hitting' or 'pitching'
+            
+        Returns:
+            Dictionary with player stats
+            
+        Raises:
+            APIClientException: If API request fails
+        """
+        # Check cache first
+        cache_key = f"player_stats_{player_id}_{season}_{stat_group}"
+        cached_response = self.cache.get(cache_key, "player_stats")
+        
+        if cached_response is None:
+            # Cache miss - fetch from API
+            logger.debug(f"Cache miss for player {player_id} stats, fetching from API")
+            
+            cached_response = self._make_request(f"/people/{player_id}/stats", {
+                "stats": "season",
+                "season": season,
+                "group": stat_group
+            })
+            
+            # Cache the raw API response
+            self.cache.set(cache_key, cached_response, "player_stats")
+        else:
+            logger.debug(f"Cache hit for player {player_id} stats")
+        
+        logger.debug(f"Returning stats for player {player_id}")
+        
+        return cached_response
