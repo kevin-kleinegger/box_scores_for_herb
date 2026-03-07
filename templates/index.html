@@ -19,9 +19,13 @@
         <!-- Quick Date Navigation -->
         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
             {% for date in last_7_dates|reverse %}
-            <a href="/date/{{ date }}">
-                <button type="button" style="padding: 6px 12px; font-size: 0.9em;">{{ date }}</button>
-            </a>
+            {% if date == default_date %}
+                <button type="button" disabled style="padding: 6px 12px; font-size: 0.9em; opacity: 0.5; cursor: not-allowed;">{{ date }}</button>
+            {% else %}
+                <a href="/date/{{ date }}">
+                    <button type="button" style="padding: 6px 12px; font-size: 0.9em;">{{ date }}</button>
+                </a>
+            {% endif %}
             {% endfor %}
         </div>
     
