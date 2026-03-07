@@ -98,9 +98,18 @@ class ConfigurationManager:
         """Get cache directory path.
         
         Returns:
-            Path to cache directory
+            Absolute path to cache directory
         """
-        return self.get('cache.directory', './cache')
+        cache_dir = self.get('cache.directory', './cache')
+        
+        # Convert relative path to absolute based on project root
+        if not os.path.isabs(cache_dir):
+            # Get project root (parent of config directory)
+            config_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(config_dir)
+            cache_dir = os.path.join(project_root, cache_dir)
+        
+        return cache_dir
     
     def get_cache_ttl(self, cache_type: str) -> int:
         """Get cache TTL in seconds for specific cache type.
