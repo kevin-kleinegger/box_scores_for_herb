@@ -4,10 +4,10 @@
 cache:
   directory: "./cache"
   ttl:
-    player_stats: 3600      # 1 hour in seconds
+    player_stats: 86400     # 24 hours in seconds
     box_scores: 86400       # 24 hours in seconds
-    standings: 3600         # 1 hour in seconds
-    leaderboards: 3600      # 1 hour in seconds
+    standings: 86400        # 24 hours in seconds
+    leaderboards: 86400     # 24 hours in seconds
 
 # MLB StatsAPI settings
 api:
