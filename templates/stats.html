@@ -10,7 +10,7 @@
     <h1>Stats for Kevin</h1>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
         <!-- Season Selector -->
-        <form onsubmit="event.preventDefault(); window.location.href='/stats-for-kevin/' + document.getElementById('season').value;" style="display: flex; align-items: center; gap: 10px;">
+        <form onsubmit="event.preventDefault(); if(confirm('Loading a new season may take 20-30 seconds. Continue?')) { window.location.href='/stats-for-kevin/' + document.getElementById('season').value; }" style="display: flex; align-items: center; gap: 10px;">
             <label for="season">Season:</label>
             <input type="number" id="season" value="{{ current_season }}" min="1900" max="2030" style="padding: 6px; width: 80px; font-family: 'Courier New', monospace; background-color: #f5f5dc; border: 1px solid #2c2c2c;">
             <input type="submit" value="Go">
@@ -40,7 +40,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for player_data in leaders[:20] %}
+                            {% for player_data in leaders[:100] %}
                             <tr {% if player_data['team_abbr'] == 'NYM' %}class="mets-player"{% endif %}>
                                 <td>{{ player_data['rank'] }}</td>
                                 <td>{{ player_data['player_name'] }}</td>

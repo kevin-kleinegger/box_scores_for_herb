@@ -293,14 +293,14 @@ class LeaderboardGenerator:
         reverse_sort = display_name not in ['ERA', 'WHIP']
         leaderboard.sort(key=lambda x: float(x['stat_value']), reverse=reverse_sort)
         
-        # Add ranks and limit to top 20
-        for rank, player in enumerate(leaderboard[:20], 1):
+        # Add ranks and limit to top 100
+        for rank, player in enumerate(leaderboard[:100], 1):
             player['rank'] = rank
         
         role = "starter" if is_starter else "reliever"
-        self.logger.debug(f"Generated {display_name} {role} leaderboard with {len(leaderboard[:20])} players")
+        self.logger.debug(f"Generated {display_name} {role} leaderboard with {len(leaderboard[:100])} players")
         
-        return leaderboard[:20]
+        return leaderboard[:100]
     
     def _generate_reliever_leaderboards(self, season: int) -> Dict[str, List[Dict]]:
         """
@@ -320,8 +320,8 @@ class LeaderboardGenerator:
         """
         self.logger.info(f"Fetching qualified relievers for {season}")
         
-        # Fetch top 200 pitchers by games played
-        response = self.api_client.get_stat_leaders('gamesPlayed', season, 'pitching', limit=200)
+        # Fetch top 500 pitchers by games played (need more to get 100 qualified relievers)
+        response = self.api_client.get_stat_leaders('gamesPlayed', season, 'pitching', limit=500)
         
         if not response or 'leagueLeaders' not in response:
             self.logger.warning(f"No games played leaders for {season}")
@@ -417,11 +417,11 @@ class LeaderboardGenerator:
             # Sort and rank
             stat_leaderboard.sort(key=lambda x: float(x['stat_value']), reverse=reverse_sort)
             
-            for rank, player in enumerate(stat_leaderboard[:20], 1):
+            for rank, player in enumerate(stat_leaderboard[:100], 1):
                 player['rank'] = rank
             
-            leaderboards[f'RP_{display_name}'] = stat_leaderboard[:20]
-            self.logger.debug(f"Generated RP_{display_name} leaderboard with {len(stat_leaderboard[:20])} players")
+            leaderboards[f'RP_{display_name}'] = stat_leaderboard[:100]
+            self.logger.debug(f"Generated RP_{display_name} leaderboard with {len(stat_leaderboard[:100])} players")
         
         return leaderboards
     
@@ -429,9 +429,8 @@ class LeaderboardGenerator:
         """
         Generate TBR and TBR+ leaderboards using OPS leaders as base.
         
-        Strategy: Fetch OPS leaders (top 100), then fetch full stats for each player
-        to calculate TBR/TBR+. This requires 101 API calls but is still much better
-        than fetching all 1200+ players.
+        Strategy: Fetch OPS leaders (top 200), then fetch full stats for each player
+        to calculate TBR/TBR+. Returns top 100 for each stat.
         
         Args:
             season: Season year
@@ -439,8 +438,8 @@ class LeaderboardGenerator:
         Returns:
             Tuple of (TBR leaderboard, TBR+ leaderboard)
         """
-        # Fetch OPS leaders as base
-        ops_response = self.api_client.get_stat_leaders('onBasePlusSlugging', season, 'hitting', limit=100)
+        # Fetch OPS leaders as base (200 to ensure accurate top 100 TBR/TBR+)
+        ops_response = self.api_client.get_stat_leaders('onBasePlusSlugging', season, 'hitting', limit=200)
         
         if not ops_response or 'leagueLeaders' not in ops_response:
             self.logger.warning(f"No OPS leaders data for {season}, cannot calculate TBR/TBR+")
