@@ -50,6 +50,25 @@ class LeaderboardGenerator:
         ('walksAndHitsPerInningPitched', 'WHIP')
     ]
     
+    # Pitching stats for starters (no saves)
+    STARTER_PITCHING_STATS = [
+        ('earnedRunAverage', 'ERA'),
+        ('wins', 'W'),
+        ('strikeouts', 'K'),
+        ('inningsPitched', 'IP'),
+        ('walksAndHitsPerInningPitched', 'WHIP')
+    ]
+    
+    # Pitching stats for relievers (includes saves)
+    RELIEVER_PITCHING_STATS = [
+        ('earnedRunAverage', 'ERA'),
+        ('wins', 'W'),
+        ('strikeouts', 'K'),
+        ('saves', 'SV'),
+        ('inningsPitched', 'IP'),
+        ('walksAndHitsPerInningPitched', 'WHIP')
+    ]
+    
     # Custom stats that need calculation
     CUSTOM_HITTING_STATS = ['TBR', 'TBR+']
     
@@ -58,6 +77,7 @@ class LeaderboardGenerator:
         Generate all leaderboards for a given season.
         
         Fetches standard stat leaders from API and calculates custom stats (TBR, TBR+).
+        Splits pitching into separate starter and reliever leaderboards.
         
         Args:
             season: Season year (e.g., 2024). Defaults to current active season if None.
@@ -68,6 +88,8 @@ class LeaderboardGenerator:
                 'AVG': [{'player': PlayerStats, 'rank': 1, 'value': '.350'}, ...],
                 'HR': [...],
                 'TBR': [...],
+                'SP_ERA': [...],  # Starting pitcher ERA
+                'RP_ERA': [...],  # Relief pitcher ERA
                 ...
             }
         """
@@ -84,11 +106,15 @@ class LeaderboardGenerator:
                 api_stat, season, 'hitting', display_name
             )
         
-        # Generate standard pitching stat leaderboards
-        for api_stat, display_name in self.STANDARD_PITCHING_STATS:
-            leaderboards[display_name] = self._generate_standard_leaderboard(
-                api_stat, season, 'pitching', display_name
+        # Generate starting pitcher leaderboards
+        for api_stat, display_name in self.STARTER_PITCHING_STATS:
+            leaderboards[f'SP_{display_name}'] = self._generate_pitcher_leaderboard(
+                api_stat, season, display_name, is_starter=True
             )
+        
+        # Generate relief pitcher leaderboards (fetch relievers once, then generate all stats)
+        reliever_leaderboards = self._generate_reliever_leaderboards(season)
+        leaderboards.update(reliever_leaderboards)
         
         # Generate custom hitting stat leaderboards (TBR, TBR+)
         # Use OPS leaders as base, then calculate TBR/TBR+
@@ -181,6 +207,223 @@ class LeaderboardGenerator:
         
         self.logger.debug(f"Generated {display_name} leaderboard with {len(leaderboard)} players")
         return leaderboard
+    
+    def _generate_pitcher_leaderboard(self, api_stat: str, season: int, display_name: str, is_starter: bool) -> List[Dict]:
+        """
+        Generate leaderboard for pitchers (starters or relievers) with role-specific qualification.
+        
+        Qualification thresholds:
+        - Starters: 1.0 IP per team game
+        - Relievers: 0.3 IP per team game
+        
+        Args:
+            api_stat: API stat name (e.g., 'earnedRunAverage', 'strikeouts')
+            season: Season year
+            display_name: Display name for the stat (e.g., 'ERA', 'K')
+            is_starter: True for starters, False for relievers
+            
+        Returns:
+            List of player data dictionaries with rank, player info, and stat value
+        """
+        # Fetch more pitchers for relievers since they're less common in top rankings
+        # Keep fetching in batches of 100 until we have 20 qualified players
+        limit = 100
+        max_fetch = 500  # Maximum pitchers to check
+        response = self.api_client.get_stat_leaders(api_stat, season, 'pitching', limit=max_fetch if not is_starter else limit)
+        
+        if not response or 'leagueLeaders' not in response:
+            self.logger.warning(f"No leaders data for {display_name} in {season}")
+            return []
+        
+        # Get team games played for qualification threshold
+        team_games = self._get_team_games_played(season)
+        qualification_threshold = team_games * (1.0 if is_starter else 0.3)
+        
+        leaderboard = []
+        
+        for league_data in response['leagueLeaders']:
+            for leader in league_data.get('leaders', []):
+                person = leader.get('person', {})
+                team = leader.get('team', {})
+                player_id = person.get('id', 0)
+                
+                if player_id == 0:
+                    continue
+                
+                # Fetch full stats to determine starter/reliever and check qualification
+                try:
+                    stats_response = self.api_client.get_player_season_stats(player_id, season, 'pitching')
+                    
+                    if 'stats' in stats_response and len(stats_response['stats']) > 0:
+                        splits = stats_response['stats'][0].get('splits', [])
+                        if len(splits) > 0:
+                            stats = splits[0].get('stat', {})
+                            
+                            # Check if pitcher matches the role we're looking for
+                            pitcher_is_reliever = self._is_reliever(stats)
+                            if is_starter and pitcher_is_reliever:
+                                continue  # Skip relievers when generating starter leaderboard
+                            if not is_starter and not pitcher_is_reliever:
+                                continue  # Skip starters when generating reliever leaderboard
+                            
+                            # Check qualification threshold
+                            innings_pitched = float(stats.get('inningsPitched', '0'))
+                            if innings_pitched < qualification_threshold:
+                                continue  # Not qualified
+                            
+                            # Get the stat value
+                            value = leader.get('value', '0')
+                            team_abbr = team.get('abbreviation') or team.get('teamCode') or self._get_team_abbr(team.get('name', 'Unknown'))
+                            
+                            player_data = {
+                                'player_id': player_id,
+                                'player_name': person.get('fullName', 'Unknown'),
+                                'team_name': team.get('name', 'Unknown'),
+                                'team_abbr': team_abbr,
+                                'stat_value': value,
+                                'stat_name': display_name
+                            }
+                            
+                            leaderboard.append(player_data)
+                except Exception as e:
+                    self.logger.warning(f"Failed to get stats for pitcher {player_id}: {e}")
+                    continue
+        
+        # Sort by stat value (ERA and WHIP ascending, others descending)
+        reverse_sort = display_name not in ['ERA', 'WHIP']
+        leaderboard.sort(key=lambda x: float(x['stat_value']), reverse=reverse_sort)
+        
+        # Add ranks and limit to top 20
+        for rank, player in enumerate(leaderboard[:20], 1):
+            player['rank'] = rank
+        
+        role = "starter" if is_starter else "reliever"
+        self.logger.debug(f"Generated {display_name} {role} leaderboard with {len(leaderboard[:20])} players")
+        
+        return leaderboard[:20]
+    
+    def _generate_reliever_leaderboards(self, season: int) -> Dict[str, List[Dict]]:
+        """
+        Generate all reliever leaderboards by fetching relievers once.
+        
+        Strategy:
+        1. Fetch top 200 pitchers by games played (relievers play more games)
+        2. Filter for actual relievers using _is_reliever()
+        3. Filter for qualified (0.3 IP per team game)
+        4. Generate all 6 stat leaderboards from this pool
+        
+        Args:
+            season: Season year
+            
+        Returns:
+            Dictionary with RP_ERA, RP_W, RP_K, RP_SV, RP_IP, RP_WHIP leaderboards
+        """
+        self.logger.info(f"Fetching qualified relievers for {season}")
+        
+        # Fetch top 200 pitchers by games played
+        response = self.api_client.get_stat_leaders('gamesPlayed', season, 'pitching', limit=200)
+        
+        if not response or 'leagueLeaders' not in response:
+            self.logger.warning(f"No games played leaders for {season}")
+            return {}
+        
+        # Get qualification threshold
+        team_games = self._get_team_games_played(season)
+        qualification_threshold = team_games * 0.3
+        
+        qualified_relievers = []
+        
+        # Process each pitcher
+        for league_data in response['leagueLeaders']:
+            for leader in league_data.get('leaders', []):
+                person = leader.get('person', {})
+                team = leader.get('team', {})
+                player_id = person.get('id', 0)
+                
+                if player_id == 0:
+                    continue
+                
+                try:
+                    # Fetch full stats
+                    stats_response = self.api_client.get_player_season_stats(player_id, season, 'pitching')
+                    
+                    if 'stats' in stats_response and len(stats_response['stats']) > 0:
+                        splits = stats_response['stats'][0].get('splits', [])
+                        if len(splits) > 0:
+                            stats = splits[0].get('stat', {})
+                            
+                            # Check if reliever
+                            if not self._is_reliever(stats):
+                                continue
+                            
+                            # Check qualification
+                            innings_pitched = float(stats.get('inningsPitched', '0'))
+                            if innings_pitched < qualification_threshold:
+                                continue
+                            
+                            # Add to qualified relievers pool
+                            team_abbr = team.get('abbreviation') or team.get('teamCode') or self._get_team_abbr(team.get('name', 'Unknown'))
+                            
+                            reliever_data = {
+                                'player_id': player_id,
+                                'player_name': person.get('fullName', 'Unknown'),
+                                'team_name': team.get('name', 'Unknown'),
+                                'team_abbr': team_abbr,
+                                'stats': stats  # Store all stats
+                            }
+                            
+                            qualified_relievers.append(reliever_data)
+                            
+                except Exception as e:
+                    self.logger.warning(f"Failed to get stats for pitcher {player_id}: {e}")
+                    continue
+        
+        self.logger.info(f"Found {len(qualified_relievers)} qualified relievers")
+        
+        # Generate leaderboards for each stat
+        leaderboards = {}
+        
+        stat_mappings = [
+            ('era', 'ERA', False),  # False = ascending sort
+            ('wins', 'W', True),  # True = descending sort
+            ('strikeOuts', 'K', True),
+            ('saves', 'SV', True),
+            ('inningsPitched', 'IP', True),
+            ('whip', 'WHIP', False)
+        ]
+        
+        for stat_key, display_name, reverse_sort in stat_mappings:
+            # Create leaderboard for this stat
+            stat_leaderboard = []
+            
+            for reliever in qualified_relievers:
+                stat_value = reliever['stats'].get(stat_key, None)
+                
+                # Skip if stat is missing (but allow 0 for ERA)
+                if stat_value is None or stat_value == '':
+                    continue
+                
+                player_data = {
+                    'player_id': reliever['player_id'],
+                    'player_name': reliever['player_name'],
+                    'team_name': reliever['team_name'],
+                    'team_abbr': reliever['team_abbr'],
+                    'stat_value': str(stat_value),
+                    'stat_name': display_name
+                }
+                
+                stat_leaderboard.append(player_data)
+            
+            # Sort and rank
+            stat_leaderboard.sort(key=lambda x: float(x['stat_value']), reverse=reverse_sort)
+            
+            for rank, player in enumerate(stat_leaderboard[:20], 1):
+                player['rank'] = rank
+            
+            leaderboards[f'RP_{display_name}'] = stat_leaderboard[:20]
+            self.logger.debug(f"Generated RP_{display_name} leaderboard with {len(stat_leaderboard[:20])} players")
+        
+        return leaderboards
     
     def _generate_custom_leaderboards(self, season: int) -> tuple[List[Dict], List[Dict]]:
         """
@@ -320,3 +563,72 @@ class LeaderboardGenerator:
             Team abbreviation (e.g., 'NYY' for 'New York Yankees')
         """
         return self.TEAM_ABBREVIATIONS.get(team_name, 'UNK')
+    
+    def _is_reliever(self, stats: dict) -> bool:
+        """
+        Determine if a pitcher is a reliever based on their stats.
+        
+        A pitcher is considered a reliever if ANY of these are true:
+        - Games Started (GS) = 0 (pure reliever)
+        - GS / Games Played (G) < 0.5 (mostly relieves)
+        - IP / G < 3.0 (doesn't pitch deep into games, handles openers)
+        
+        Args:
+            stats: Dictionary of pitcher stats
+            
+        Returns:
+            True if reliever, False if starter
+        """
+        games_started = int(stats.get('gamesStarted', 0))
+        games_played = int(stats.get('gamesPlayed', 0))
+        innings_pitched = float(stats.get('inningsPitched', '0'))
+        
+        # Pure reliever (no starts)
+        if games_started == 0:
+            return True
+        
+        # Mostly relieves (less than half games are starts)
+        if games_played > 0 and (games_started / games_played) < 0.5:
+            return True
+        
+        # Doesn't pitch deep (handles openers and swing guys)
+        if games_played > 0 and (innings_pitched / games_played) < 3.0:
+            return True
+        
+        return False
+    
+    def _get_team_games_played(self, season: int) -> int:
+        """
+        Get the number of games played by a team in the season.
+        
+        Uses a sample team (Mets, team ID 121) to determine games played.
+        All teams play the same number of games in a season (162 for full season).
+        
+        Args:
+            season: Season year
+            
+        Returns:
+            Number of games played (defaults to 162 if unable to fetch)
+        """
+        try:
+            # Fetch team stats for a sample team (Mets)
+            import requests
+            url = f'https://statsapi.mlb.com/api/v1/teams/121/stats'
+            params = {
+                'season': season,
+                'group': 'hitting',
+                'stats': 'season'
+            }
+            response = requests.get(url, params=params, timeout=10)
+            data = response.json()
+            
+            if 'stats' in data and len(data['stats']) > 0:
+                splits = data['stats'][0].get('splits', [])
+                if len(splits) > 0:
+                    games_played = splits[0]['stat'].get('gamesPlayed', 162)
+                    return games_played
+        except Exception as e:
+            self.logger.warning(f"Failed to get team games played for {season}: {e}")
+        
+        # Default to 162 (full season)
+        return 162

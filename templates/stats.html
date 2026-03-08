@@ -22,12 +22,12 @@
         </a>
     </div>
     
-    <!-- Pitching Stats Section -->
+    <!-- Hitting Stats Section -->
     <div class="stats-section">
-        <h2>Pitching Leaders</h2>
+        <h2>Hitting Leaders</h2>
         <div class="leaderboard-grid">
             {% for stat_name, leaders in leaderboards.items() %}
-                {% if stat_name in ['ERA', 'W', 'K', 'SV', 'IP', 'WHIP'] %}
+                {% if not stat_name.startswith('SP_') and not stat_name.startswith('RP_') and stat_name not in ['ERA', 'W', 'K', 'SV', 'IP', 'WHIP'] %}
                 <div class="leaderboard-card">
                     <h3>{{ stat_name }}</h3>
                     <table>
@@ -56,25 +56,59 @@
         </div>
     </div>
     
-    <!-- Hitting Stats Section -->
+    <!-- Starting Pitchers Section -->
     <div class="stats-section">
-        <h2>Hitting Leaders</h2>
+        <h2>Starting Pitchers</h2>
         <div class="leaderboard-grid">
             {% for stat_name, leaders in leaderboards.items() %}
-                {% if stat_name not in ['ERA', 'W', 'K', 'SV', 'IP', 'WHIP'] %}
+                {% if stat_name.startswith('SP_') %}
                 <div class="leaderboard-card">
-                    <h3>{{ stat_name }}</h3>
+                    <h3>{{ stat_name[3:] }}</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>Rank</th>
                                 <th>Player</th>
                                 <th>Team</th>
-                                <th>{{ stat_name }}</th>
+                                <th>{{ stat_name[3:] }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for player_data in leaders[:20] %}
+                            {% for player_data in leaders %}
+                            <tr {% if player_data['team_abbr'] == 'NYM' %}class="mets-player"{% endif %}>
+                                <td>{{ player_data['rank'] }}</td>
+                                <td>{{ player_data['player_name'] }}</td>
+                                <td>{{ player_data['team_abbr'] }}</td>
+                                <td>{{ player_data['stat_value'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Relief Pitchers Section -->
+    <div class="stats-section">
+        <h2>Relief Pitchers</h2>
+        <div class="leaderboard-grid">
+            {% for stat_name, leaders in leaderboards.items() %}
+                {% if stat_name.startswith('RP_') %}
+                <div class="leaderboard-card">
+                    <h3>{{ stat_name[3:] }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>{{ stat_name[3:] }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player_data in leaders %}
                             <tr {% if player_data['team_abbr'] == 'NYM' %}class="mets-player"{% endif %}>
                                 <td>{{ player_data['rank'] }}</td>
                                 <td>{{ player_data['player_name'] }}</td>
